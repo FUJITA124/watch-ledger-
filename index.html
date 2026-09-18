@@ -1,0 +1,1497 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#E9ECEF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1115" media="(prefers-color-scheme: dark)">
+<meta name="description" content="腕時計の購入情報・着用記録・メンテナンス履歴から、次回オーバーホールの時期と残り日数を管理します。">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="時計台帳">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px)}
+html{color-scheme:light dark}
+body{margin:0; -webkit-text-size-adjust:100%}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<title>時計メンテナンス台帳</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#E9ECEF;
+  --surface:#FFFFFF;
+  --surface-2:#F3F5F8;
+  --ink:#141A20;
+  --ink-2:#4C5866;
+  --ink-3:#7A8694;
+  --line:#D2D8DF;
+  --line-2:#B7C0C9;
+  --accent:#7A6534;
+  --accent-2:#A98F50;
+  --accent-soft:#EFE7D6;
+  --ok:#186C53;    --ok-soft:#DBEDE6;
+  --soon:#A85A0A;  --soon-soft:#F8E5D0;
+  --over:#A32220;  --over-soft:#F9DEDC;
+  --shadow:0 1px 2px rgba(16,22,28,.05), 0 10px 26px -14px rgba(16,22,28,.22);
+  --radius:10px;
+  --f-display:'Zen Old Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  --f-body:'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', system-ui, sans-serif;
+  --f-mono:'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1115; --surface:#161B21; --surface-2:#1C232A;
+    --ink:#E7ECF1; --ink-2:#A2AEBA; --ink-3:#76828E;
+    --line:#252D35; --line-2:#3A444E;
+    --accent:#C8A96A; --accent-2:#9B865A; --accent-soft:#332A18;
+    --ok:#4FBF9B;   --ok-soft:#12332B;
+    --soon:#E8913E; --soon-soft:#3A2814;
+    --over:#F0796F; --over-soft:#3C1D1B;
+    --shadow:0 1px 2px rgba(0,0,0,.45), 0 14px 34px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1115; --surface:#161B21; --surface-2:#1C232A;
+  --ink:#E7ECF1; --ink-2:#A2AEBA; --ink-3:#76828E;
+  --line:#252D35; --line-2:#3A444E;
+  --accent:#C8A96A; --accent-2:#9B865A; --accent-soft:#332A18;
+  --ok:#4FBF9B;   --ok-soft:#12332B;
+  --soon:#E8913E; --soon-soft:#3A2814;
+  --over:#F0796F; --over-soft:#3C1D1B;
+  --shadow:0 1px 2px rgba(0,0,0,.45), 0 14px 34px -18px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--f-body); font-size:15px; line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1040px; margin:0 auto; padding-inline:16px; padding-block:0 56px}
+h1,h2,h3{font-family:var(--f-display); font-weight:600; text-wrap:balance; margin:0}
+button{font:inherit; color:inherit; cursor:pointer}
+:focus-visible{outline:2px solid var(--accent-2); outline-offset:2px; border-radius:4px}
+.eyebrow{
+  font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:500;
+}
+
+/* ---------- masthead ---------- */
+.mast{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.mast-in{
+  max-width:1040px; margin:0 auto; padding:14px 16px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:baseline; gap:10px; margin-right:auto; min-width:0}
+.brand h1{font-size:19px; letter-spacing:.04em; white-space:nowrap}
+.brand .rule{height:1px; width:28px; background:var(--accent-2); flex:none; align-self:center}
+.badge{
+  font-size:11px; padding:3px 9px; border-radius:99px; white-space:nowrap;
+  border:1px solid var(--line-2); color:var(--ink-3); background:var(--surface);
+}
+.btn{
+  border:1px solid var(--line-2); background:var(--surface); color:var(--ink);
+  padding:7px 14px; border-radius:8px; font-size:13.5px; font-weight:500;
+  transition:border-color .15s, background .15s;
+}
+.btn:hover{border-color:var(--accent-2)}
+.btn-primary{background:var(--accent); border-color:var(--accent); color:#fff}
+:root[data-theme="dark"] .btn-primary, :root:not([data-theme="light"]) .btn-primary{color:#17130A}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .btn-primary{color:#fff}}
+.btn-primary:hover{filter:brightness(1.08); border-color:var(--accent)}
+.btn-ghost{background:transparent; border-color:transparent; color:var(--ink-2); padding:7px 10px}
+.btn-ghost:hover{color:var(--ink); background:var(--surface-2); border-color:transparent}
+.btn-danger{color:var(--over); border-color:var(--over)}
+.btn-danger:hover{background:var(--over-soft); border-color:var(--over)}
+.btn-sm{padding:5px 11px; font-size:12.5px}
+.btn:disabled{opacity:.4; cursor:not-allowed}
+
+.alert{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  background:var(--soon-soft); border:1px solid color-mix(in srgb, var(--soon) 40%, transparent);
+  color:var(--ink); border-radius:var(--radius); padding:11px 15px; margin-top:20px; font-size:13px;
+}
+.alert b{color:var(--soon)}
+.alert .btn{margin-left:auto}
+
+/* ---------- summary strip ---------- */
+.strip{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+  background:var(--line); border:1px solid var(--line);
+  border-radius:var(--radius); overflow:hidden; margin:22px 0 26px;
+}
+.strip div{background:var(--surface); padding:13px 15px}
+.strip .k{font-size:10.5px; letter-spacing:.14em; color:var(--ink-3); text-transform:uppercase}
+.strip .v{font-family:var(--f-mono); font-size:21px; font-weight:500; margin-top:3px; font-variant-numeric:tabular-nums}
+.strip .v small{font-size:11px; font-family:var(--f-body); color:var(--ink-3); margin-left:3px; font-weight:400}
+@media(max-width:720px){ .strip{grid-template-columns:repeat(2,1fr)} }
+
+/* ---------- collection ---------- */
+.sec-head{display:flex; align-items:baseline; gap:12px; margin:0 0 14px}
+.sec-head h2{font-size:15px; letter-spacing:.1em}
+.sec-head .line{flex:1; height:1px; background:var(--line)}
+.grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px}
+@media(max-width:760px){ .grid{grid-template-columns:1fr} }
+
+.card{
+  position:relative; text-align:left; width:100%;
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:16px 18px 14px 21px;
+  box-shadow:var(--shadow); transition:transform .14s, border-color .14s;
+  display:block;
+}
+.card:hover{transform:translateY(-2px); border-color:var(--line-2)}
+.card::before{
+  content:''; position:absolute; left:0; top:12px; bottom:12px; width:3px;
+  border-radius:0 3px 3px 0; background:var(--st);
+}
+.card-top{display:flex; justify-content:space-between; gap:14px; align-items:flex-start}
+.card .maker{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3)}
+.card .model{font-family:var(--f-display); font-size:19px; line-height:1.35; margin-top:1px}
+.card .yr{font-size:12px; color:var(--ink-3); margin-top:2px}
+.count{text-align:right; flex:none}
+.count .d{font-family:var(--f-mono); font-size:30px; font-weight:500; line-height:1; color:var(--st); font-variant-numeric:tabular-nums}
+.count .u{font-size:11px; color:var(--ink-3); margin-top:3px}
+.bar{height:4px; border-radius:99px; background:var(--surface-2); overflow:hidden; margin-top:14px; border:1px solid var(--line)}
+.bar i{display:block; height:100%; background:var(--st)}
+.card-foot{display:flex; justify-content:space-between; gap:10px; margin-top:8px; font-size:12px; color:var(--ink-2); flex-wrap:wrap}
+.chip{
+  display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:500;
+  padding:2px 8px; border-radius:99px; background:var(--st-soft); color:var(--st);
+  border:1px solid color-mix(in srgb, var(--st) 35%, transparent);
+}
+.chip::before{content:''; width:5px; height:5px; border-radius:99px; background:currentColor}
+.s-ok{--st:var(--ok); --st-soft:var(--ok-soft)}
+.s-soon{--st:var(--soon); --st-soft:var(--soon-soft)}
+.s-over{--st:var(--over); --st-soft:var(--over-soft)}
+.s-none{--st:var(--ink-3); --st-soft:var(--surface-2)}
+
+/* ---------- empty ---------- */
+.empty{
+  border:1px dashed var(--line-2); border-radius:var(--radius);
+  padding:44px 24px; text-align:center; background:var(--surface);
+}
+.empty h2{font-size:20px; margin-bottom:8px}
+.empty p{color:var(--ink-2); max-width:46ch; margin:0 auto 20px; font-size:14px}
+.empty .acts{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
+
+/* ---------- detail ---------- */
+.back{display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-2); background:none; border:0; padding:14px 0; margin:0}
+.back:hover{color:var(--accent-2)}
+.hero{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:var(--shadow); padding:22px; display:flex; gap:26px; align-items:center; flex-wrap:wrap;
+}
+.hero .info{flex:1; min-width:220px}
+.hero h2{font-size:26px; line-height:1.3}
+.hero .due{margin-top:12px; display:flex; gap:22px; flex-wrap:wrap}
+.hero .due div .k{font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
+.hero .due div .v{font-family:var(--f-mono); font-size:16px; font-weight:500; font-variant-numeric:tabular-nums}
+.hero .acts{display:flex; gap:8px; flex-wrap:wrap; margin-top:16px}
+.ringwrap{position:relative; width:128px; height:128px; flex:none}
+.ringwrap .mid{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center;
+}
+.ringwrap .mid b{font-family:var(--f-mono); font-size:27px; font-weight:500; line-height:1; color:var(--st); font-variant-numeric:tabular-nums}
+.ringwrap .mid span{font-size:10.5px; color:var(--ink-3); margin-top:4px; letter-spacing:.06em}
+
+.tabs{display:flex; gap:2px; margin:26px 0 0; border-bottom:1px solid var(--line); overflow-x:auto}
+.tabs button{
+  background:none; border:0; border-bottom:2px solid transparent; margin-bottom:-1px;
+  padding:9px 14px; font-size:13.5px; color:var(--ink-3); white-space:nowrap; font-weight:500;
+}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent-2)}
+.panel{
+  background:var(--surface); border:1px solid var(--line); border-top:0;
+  border-radius:0 0 var(--radius) var(--radius); padding:20px; box-shadow:var(--shadow);
+}
+
+.spec{display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:8px; overflow:hidden}
+.spec div{background:var(--surface); padding:11px 14px}
+.spec .k{font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
+.spec .v{margin-top:2px; font-size:14.5px}
+.spec .v.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+@media(max-width:560px){ .spec{grid-template-columns:1fr} }
+
+.note{
+  font-size:12.5px; color:var(--ink-2); background:var(--surface-2);
+  border:1px solid var(--line); border-left:3px solid var(--accent-2);
+  border-radius:0 8px 8px 0; padding:11px 14px; margin-top:18px;
+}
+.note b{color:var(--ink); font-weight:500}
+.note.cap{border-left-color:var(--soon)}
+
+/* ---------- calendar ---------- */
+.calbar{display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap}
+.calbar .mo{font-family:var(--f-display); font-size:18px; min-width:9ch}
+.calbar .nav{display:flex; gap:4px; margin-left:auto}
+.calbar .nav button{width:32px; height:32px; display:grid; place-items:center; padding:0}
+.dow{display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:5px}
+.dow span{text-align:center; font-size:10.5px; color:var(--ink-3); letter-spacing:.08em}
+.dow span:first-child{color:var(--over)}
+.days{display:grid; grid-template-columns:repeat(7,1fr); gap:5px}
+.day{
+  aspect-ratio:1/1; min-height:40px; border:1px solid var(--line); border-radius:7px;
+  background:var(--surface-2); color:var(--ink-2);
+  font-family:var(--f-mono); font-size:13.5px; display:grid; place-items:center;
+  padding:0; transition:background .12s, border-color .12s; position:relative;
+}
+.day:hover:not(:disabled){border-color:var(--accent-2)}
+.day.on{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600}
+:root[data-theme="dark"] .day.on, :root:not([data-theme="light"]) .day.on{color:#17130A}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .day.on{color:#fff}}
+.day.run{background:var(--accent-soft); border-color:color-mix(in srgb, var(--accent-2) 45%, transparent); color:var(--accent)}
+.day.today{box-shadow:inset 0 0 0 2px var(--accent-2)}
+.day:disabled{opacity:.35; cursor:default; background:transparent}
+.day.blank{border:0; background:none; cursor:default}
+.legend{display:flex; gap:16px; flex-wrap:wrap; margin-top:12px; font-size:12px; color:var(--ink-2)}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.legend i{width:14px; height:14px; border-radius:4px; display:inline-block; border:1px solid var(--line)}
+.legend i.w{background:var(--accent); border-color:var(--accent)}
+.legend i.r{background:var(--accent-soft); border-color:color-mix(in srgb, var(--accent-2) 45%, transparent)}
+.legend i.n{background:var(--surface-2)}
+.mstats{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-top:16px}
+.mstats div{background:var(--surface); padding:10px 13px; text-align:center}
+.mstats .k{font-size:10.5px; letter-spacing:.1em; color:var(--ink-3)}
+.mstats .v{font-family:var(--f-mono); font-size:19px; font-weight:500; margin-top:2px; font-variant-numeric:tabular-nums}
+.rec{display:flex; align-items:center; gap:9px; margin-top:14px; font-size:13px; color:var(--ink-2)}
+.rec input{width:16px; height:16px; accent-color:var(--accent)}
+
+/* ---------- history / table ---------- */
+.hist{display:flex; flex-direction:column; gap:10px}
+.hrow{
+  display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+  border:1px solid var(--line); border-radius:8px; padding:12px 14px; background:var(--surface-2);
+}
+.hrow .d{font-family:var(--f-mono); font-size:13.5px; color:var(--accent-2); font-weight:500}
+.hrow .c{font-size:14.5px; margin-top:2px}
+.hrow .s{font-size:12.5px; color:var(--ink-3); margin-top:2px}
+.hrow .amt{font-family:var(--f-mono); font-size:15px; font-variant-numeric:tabular-nums; white-space:nowrap; text-align:right}
+.tblwrap{overflow-x:auto; border:1px solid var(--line); border-radius:8px; max-height:460px}
+table{border-collapse:collapse; width:100%; font-size:13px; min-width:560px}
+th,td{padding:8px 12px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{
+  font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3);
+  font-weight:500; background:var(--surface-2); position:sticky; top:0; z-index:1;
+}
+tbody td{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:0}
+tr.unrec td{color:var(--ink-3)}
+tr.gain td{background:var(--accent-soft)}
+tr.over td{opacity:.55}
+tfoot td{font-weight:600; background:var(--surface-2); font-family:var(--f-mono); position:sticky; bottom:0}
+
+/* ---------- modal / forms ---------- */
+.veil{
+  position:fixed; inset:0; z-index:60; background:rgba(10,14,18,.55);
+  display:flex; align-items:flex-start; justify-content:center; overflow-y:auto;
+  padding:24px 16px; backdrop-filter:blur(2px);
+}
+.modal{
+  background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  box-shadow:0 24px 60px -20px rgba(0,0,0,.5); width:100%; max-width:540px;
+  padding:22px; margin:auto;
+}
+.modal h3{font-size:19px; margin-bottom:4px}
+.modal .sub{font-size:12.5px; color:var(--ink-3); margin-bottom:18px}
+.fields{display:grid; grid-template-columns:1fr 1fr; gap:13px}
+.fields .full{grid-column:1/-1}
+@media(max-width:520px){ .fields{grid-template-columns:1fr} }
+label{display:block}
+label .lb, .lb{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin-bottom:5px; display:block}
+input,select,textarea{
+  width:100%; font:inherit; font-size:14px; color:var(--ink);
+  background:var(--surface-2); border:1px solid var(--line-2);
+  border-radius:7px; padding:8px 10px;
+}
+input[type="number"],input[type="date"]{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-2); outline-offset:0; border-color:var(--accent-2)}
+.seg{display:flex; border:1px solid var(--line-2); border-radius:7px; overflow:hidden}
+.seg button{flex:1; background:var(--surface-2); border:0; padding:8px; font-size:13.5px; color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:#fff; font-weight:500}
+:root[data-theme="dark"] .seg button[aria-pressed="true"], :root:not([data-theme="light"]) .seg button[aria-pressed="true"]{color:#17130A}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .seg button[aria-pressed="true"]{color:#fff}}
+.modal-acts{display:flex; gap:9px; justify-content:flex-end; margin-top:22px; flex-wrap:wrap}
+.modal-acts .left{margin-right:auto}
+.err{color:var(--over); font-size:12.5px; margin-top:12px; min-height:1em}
+
+/* ---------- combobox ---------- */
+.combo{position:relative}
+.combo input{padding-right:34px}
+.combo-tog{
+  position:absolute; right:1px; top:1px; bottom:1px; width:30px;
+  background:none; border:0; color:var(--ink-3); font-size:11px; display:grid; place-items:center; border-radius:0 7px 7px 0;
+}
+.combo-tog:hover{color:var(--accent-2)}
+.combo-list{
+  position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
+  background:var(--surface); border:1px solid var(--line-2); border-radius:8px;
+  box-shadow:0 16px 36px -14px rgba(0,0,0,.4); max-height:264px; overflow-y:auto; padding:4px;
+}
+.combo-list .g{
+  font-size:10px; letter-spacing:.14em; color:var(--ink-3); padding:8px 10px 4px;
+  position:sticky; top:-4px; background:var(--surface);
+}
+.combo-list button{
+  display:block; width:100%; text-align:left; background:none; border:0;
+  padding:6px 10px; border-radius:6px; font-size:13.5px; color:var(--ink);
+}
+.combo-list button:hover{background:var(--accent-soft); color:var(--accent)}
+.combo-list .none{padding:10px; font-size:12.5px; color:var(--ink-3)}
+
+.dsec{border-top:1px solid var(--line); margin-top:18px; padding-top:16px}
+.dsec .row{display:flex; gap:9px; flex-wrap:wrap; margin-top:10px}
+.dsec p{font-size:12.5px; color:var(--ink-2); margin:0}
+
+.toast{
+  position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%);
+  background:var(--ink); color:var(--bg); padding:9px 16px; border-radius:99px;
+  font-size:13px; z-index:90; box-shadow:var(--shadow); max-width:calc(100% - 32px); text-align:center;
+}
+footer{margin-top:34px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-3)}
+
+/* ---------- phone ---------- */
+button{touch-action:manipulation}
+@media(max-width:560px){
+  body{font-size:14.5px}
+  .mast-in{display:grid; grid-template-columns:1fr auto; gap:8px 10px; align-items:center; padding:10px 16px}
+  .brand{grid-column:1; grid-row:1; margin-right:0}
+  .brand h1{font-size:17px}
+  .brand .rule, .brand .eyebrow{display:none}
+  #btnAdd{grid-column:2; grid-row:1}
+  #modeBadge{grid-column:1; grid-row:2; justify-self:start}
+  #btnSettings{grid-column:2; grid-row:2; justify-self:end}
+
+  .strip{margin:16px 0 20px}
+  .strip div{padding:11px 13px}
+  .strip .v{font-size:19px}
+
+  .card{padding:14px 15px 12px 18px}
+  .card .model{font-size:17px}
+  .count .d{font-size:26px}
+
+  .hero{flex-direction:column; align-items:stretch; gap:16px; padding:18px}
+  .hero .ringwrap{align-self:center; width:112px; height:112px}
+  .hero .ringwrap svg{width:100%; height:100%}
+  .hero .ringwrap .mid b{font-size:24px}
+  .hero h2{font-size:22px}
+  .hero .due{gap:14px 18px}
+  .hero .acts{margin-top:14px}
+  .hero .acts .btn{flex:1 1 auto}
+
+  .tabs button{padding:9px 11px; font-size:13px}
+  .panel{padding:16px 14px}
+  .days, .dow{gap:4px}
+  .day{min-height:42px; font-size:13px}
+  .calbar .mo{font-size:17px; min-width:8ch}
+  .mstats div{padding:9px 6px}
+  .mstats .v{font-size:17px}
+  .legend{gap:10px; font-size:11.5px}
+
+  .modal{padding:18px}
+  .modal-acts{gap:8px}
+  .modal-acts .btn{flex:1 1 auto}
+  .modal-acts .left{flex:1 1 100%; margin-right:0; order:9}
+  /* 16px stops iOS Safari zooming in when a field takes focus */
+  input, select, textarea{font-size:16px}
+}
+@media(max-width:400px){
+  .strip{grid-template-columns:1fr 1fr}
+  .hero .due{gap:12px 16px}
+  .day{min-height:40px}
+}
+
+@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+</style>
+
+<header class="mast">
+  <div class="mast-in">
+    <div class="brand">
+      <h1>時計メンテナンス台帳</h1>
+      <span class="rule"></span>
+      <span class="eyebrow">Overhaul Ledger</span>
+    </div>
+    <span class="badge" id="modeBadge">読み込み中</span>
+    <button class="btn btn-ghost" id="btnSettings">設定</button>
+    <button class="btn btn-primary" id="btnAdd">時計を追加</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="banner"></div>
+  <div id="app"></div>
+  <footer id="foot"></footer>
+</div>
+
+<div id="modalRoot"></div>
+<input type="file" id="impFile" accept="application/json,.json" hidden>
+
+<script>
+(function(){
+"use strict";
+
+/* ============ makers ============ */
+var MAKERS = [
+  ['日本', ['GRAND SEIKO','SEIKO','CREDOR','CITIZEN','THE CITIZEN','CAMPANOLA','CASIO','G-SHOCK','ORIENT','ORIENT STAR','MINASE','KURONO TOKYO','NAOYA HIDA','KNOT','SPQR']],
+  ['スイス', ['ROLEX','TUDOR','OMEGA','PATEK PHILIPPE','AUDEMARS PIGUET','VACHERON CONSTANTIN','JAEGER-LECOULTRE','IWC','BREGUET','BLANCPAIN','CARTIER','PANERAI','HUBLOT','ZENITH','TAG HEUER','BREITLING','LONGINES','ORIS','HAMILTON','TISSOT','RADO','MIDO','CERTINA','CHOPARD','PIAGET','ULYSSE NARDIN','GIRARD-PERREGAUX','BELL & ROSS','BAUME & MERCIER','MONTBLANC','FREDERIQUE CONSTANT','MAURICE LACROIX','RAYMOND WEIL','EDOX','BALL','DOXA','SQUALE','SWATCH','VICTORINOX','ALPINA','CORUM','FRANCK MULLER','H. MOSER & CIE','RICHARD MILLE','ROGER DUBUIS','PARMIGIANI FLEURIER','F.P. JOURNE','TITONI','ETERNA']],
+  ['ドイツ', ['A. LANGE & SÖHNE','GLASHÜTTE ORIGINAL','NOMOS GLASHÜTTE','SINN','JUNGHANS','MÜHLE GLASHÜTTE','UNION GLASHÜTTE','STOWA','LACO','HANHART','DAMASKO']],
+  ['その他', ['BREMONT','CHRISTOPHER WARD','FARER','SMITHS','MARATHON','TIMEX','BULOVA','SHINOLA','LUMINOX','MONDAINE','BRAUN','STURMANSKIE','VOSTOK','APPLE','GARMIN','SUUNTO','FOSSIL','SKAGEN','DANIEL WELLINGTON','NIXON']]
+];
+
+/* ============ utilities ============ */
+var $ = function(s,r){ return (r||document).querySelector(s); };
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function pad(n){ return String(n).padStart(2,'0'); }
+function ymd(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function parseYMD(s){ var p=String(s).split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+function today(){ var d=new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function addYears(d,n){ return new Date(d.getFullYear()+n, d.getMonth(), d.getDate()); }
+function addDays(d,n){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()+n); }
+function diffDays(a,b){ return Math.round((b-a)/86400000); }
+function daysInMonth(y,m){ return new Date(y, m, 0).getDate(); }
+function mkey(y,m){ return y+'-'+pad(m); }
+function jpDate(s){ if(!s) return '—'; var d=parseYMD(s); return d.getFullYear()+'.'+pad(d.getMonth()+1)+'.'+pad(d.getDate()); }
+function yen(n){ if(n==null||n==='') return '—'; return '¥'+Number(n).toLocaleString('ja-JP'); }
+function uid(){ return 'w'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+/* day serial: DST-safe integer day number */
+function serial(d){ return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())/86400000); }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+
+/* ============ state ============ */
+var DEFAULT_CFG = { intervalYears:4, maxYears:8, carryDays:2, countMode:'touched' };
+var state = { watches:{}, usage:{}, config:Object.assign({},DEFAULT_CFG) };
+var view  = { name:'list', id:null, tab:'overview', showAll:false };
+var cal   = null;
+var DB = null, mode = 'local';
+var IS_HOSTED = !!(window.claude && window.claude.use);
+var LS = 'watch-ledger-v1';
+var fileHandle = null, filePerm = 'none', fileName = '';
+
+function loadLocal(){
+  try{
+    var raw = localStorage.getItem(LS);
+    if(!raw) return;
+    apply(JSON.parse(raw));
+  }catch(e){}
+}
+function apply(o){
+  if(!o || typeof o !== 'object') return;
+  state.watches = o.watches || {};
+  state.usage   = o.usage   || {};
+  state.config  = Object.assign({}, DEFAULT_CFG, o.config || {});
+}
+function snapshotData(){
+  return { app:'watch-ledger', version:2, savedAt:new Date().toISOString(),
+           watches:state.watches, usage:state.usage, config:state.config };
+}
+function saveLocal(){
+  try{ localStorage.setItem(LS, JSON.stringify(snapshotData())); }catch(e){}
+  scheduleFileWrite();
+}
+
+/* ---- optional: keep a real .json file on disk in sync ---- */
+var fileTimer = null;
+function scheduleFileWrite(){
+  if(!fileHandle || filePerm !== 'granted') return;
+  clearTimeout(fileTimer);
+  fileTimer = setTimeout(writeFile, 700);
+}
+async function writeFile(){
+  if(!fileHandle || filePerm !== 'granted') return;
+  try{
+    var w = await fileHandle.createWritable();
+    await w.write(JSON.stringify(snapshotData(), null, 2));
+    await w.close();
+    try{ localStorage.setItem(LS+':lastfile', new Date().toISOString()); }catch(e){}
+  }catch(e){ filePerm = 'none'; renderBanner(); toast('データファイルに書き込めませんでした。設定から接続し直してください。'); }
+}
+/* handles cannot live in localStorage — keep them in IndexedDB */
+function idb(fn){
+  return new Promise(function(res){
+    var r;
+    try{ r = indexedDB.open('watch-ledger', 1); }catch(e){ return res(null); }
+    r.onupgradeneeded = function(){ r.result.createObjectStore('kv'); };
+    r.onerror = function(){ res(null); };
+    r.onsuccess = function(){
+      var db = r.result;
+      try{ fn(db, res); }catch(e){ res(null); }
+    };
+  });
+}
+function idbGet(k){ return idb(function(db,res){
+  var t = db.transaction('kv','readonly').objectStore('kv').get(k);
+  t.onsuccess = function(){ res(t.result || null); }; t.onerror = function(){ res(null); };
+}); }
+function idbSet(k,v){ return idb(function(db,res){
+  var t = db.transaction('kv','readwrite').objectStore('kv').put(v,k);
+  t.oncomplete = function(){ res(true); }; t.onsuccess = function(){ res(true); }; t.onerror = function(){ res(null); };
+}); }
+
+async function linkFile(){
+  if(!window.showSaveFilePicker){ toast('この環境ではファイル保存に対応していません。バックアップの書き出しをお使いください。'); return; }
+  try{
+    var h = await window.showSaveFilePicker({
+      suggestedName: '時計メンテナンス台帳.json',
+      types:[{description:'台帳データ (JSON)', accept:{'application/json':['.json']}}]
+    });
+    fileHandle = h; filePerm = 'granted'; fileName = h.name;
+    await idbSet('fileHandle', h);
+    await writeFile();
+    renderBanner(); render();
+    toast('データファイルに接続しました。以後、変更のたびに自動保存されます。');
+  }catch(e){
+    if(e && e.name === 'AbortError') return;
+    toast('ファイルに接続できませんでした（' + (e && e.name || '不明') + '）');
+  }
+}
+async function reconnectFile(ask){
+  if(!fileHandle || !fileHandle.queryPermission) return;
+  try{
+    var p = await fileHandle.queryPermission({mode:'readwrite'});
+    if(p !== 'granted' && ask) p = await fileHandle.requestPermission({mode:'readwrite'});
+    filePerm = p;
+    if(p === 'granted'){
+      try{
+        var f = await fileHandle.getFile();
+        var txt = await f.text();
+        if(txt.trim()){
+          var o = JSON.parse(txt);
+          var localAt = (JSON.parse(localStorage.getItem(LS)||'{}').savedAt) || '';
+          if(!localAt || (o.savedAt || '') >= localAt){ apply(o); }
+          else { scheduleFileWrite(); }
+        }
+      }catch(e){}
+      fileName = fileHandle.name;
+    }
+  }catch(e){ filePerm = 'none'; }
+  renderBanner(); render();
+}
+async function unlinkFile(){
+  fileHandle = null; filePerm = 'none'; fileName = '';
+  await idbSet('fileHandle', null);
+  renderBanner(); render();
+  toast('データファイルの接続を解除しました。データはこのブラウザに残っています。');
+}
+
+function exportBackup(){
+  var blob = new Blob([JSON.stringify(snapshotData(), null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = '時計メンテナンス台帳_' + ymd(today()) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  try{ localStorage.setItem(LS+':lastexport', new Date().toISOString()); }catch(e){}
+  toast('バックアップを書き出しました');
+}
+$('#impFile').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0]; if(!f) return;
+  var rd = new FileReader();
+  rd.onload = function(){
+    try{
+      var o = JSON.parse(rd.result);
+      if(!o.watches) throw new Error('形式が違います');
+      apply(o);
+      if(mode === 'db'){ pushAllToDb(); } else { saveLocal(); }
+      view = {name:'list', tab:'overview'}; render();
+      toast('バックアップを読み込みました（' + Object.keys(state.watches).length + ' 本）');
+    }catch(err){ toast('読み込めませんでした：' + (err.message || '不明なファイル')); }
+  };
+  rd.readAsText(f);
+  e.target.value = '';
+});
+
+/* one write at a time per document, coalescing bursts */
+var wq = {};
+function enqueue(path, fn){
+  var st = wq[path] || (wq[path] = {busy:false, latest:null});
+  st.latest = fn;
+  if(st.busy) return;
+  st.busy = true;
+  (async function(){
+    try{
+      while(st.latest){ var f = st.latest; st.latest = null; await f(); }
+    }catch(e){
+      toast('保存できませんでした（' + (e && (e.code||e.message) || '不明') + '）');
+    }finally{ st.busy = false; }
+  })();
+}
+async function pushAllToDb(){
+  var ids = Object.keys(state.watches);
+  for(var i=0;i<ids.length;i++){
+    await DB.doc('watches/'+ids[i]).set(state.watches[ids[i]]);
+    if(state.usage[ids[i]]) await DB.doc('usage/'+ids[i]).set(state.usage[ids[i]]);
+  }
+  await DB.doc('config/app').set(state.config);
+}
+
+function putWatch(id, w){
+  state.watches[id] = w; render();
+  if(mode==='db') enqueue('watches/'+id, function(){ return DB.doc('watches/'+id).set(w); });
+  else saveLocal();
+}
+function removeWatch(id){
+  delete state.watches[id]; delete state.usage[id]; render();
+  if(mode==='db'){
+    enqueue('watches/'+id, function(){ return DB.doc('watches/'+id).delete(); });
+    enqueue('usage/'+id,   function(){ return DB.doc('usage/'+id).delete(); });
+  } else saveLocal();
+}
+function putUsage(id, u){
+  state.usage[id] = u; render();
+  if(mode==='db') enqueue('usage/'+id, function(){ return DB.doc('usage/'+id).set(u); });
+  else saveLocal();
+}
+function putConfig(c){
+  state.config = c; render();
+  if(mode==='db') enqueue('config/app', function(){ return DB.doc('config/app').set(c); });
+  else saveLocal();
+}
+
+/* ============ the maintenance maths ============ */
+/* Complete calendar months strictly between the base month and the current month. */
+function completeMonths(base, now){
+  var out = [], y = base.getFullYear(), m = base.getMonth()+1;
+  m++; if(m>12){ m=1; y++; }
+  var ey = now.getFullYear(), em = now.getMonth()+1;
+  while(y<ey || (y===ey && m<em)){
+    out.push({y:y, m:m});
+    m++; if(m>12){ m=1; y++; }
+    if(out.length>1500) break;
+  }
+  return out;
+}
+
+/* Every day the movement is turning: each worn day, plus the `carry` days after it. */
+function runningSet(u, carry){
+  var set = {}, mm = (u && u.months) || {};
+  Object.keys(mm).forEach(function(k){
+    var p = k.split('-'), y = +p[0], m = +p[1];
+    if(!y || !m) return;
+    (mm[k]||[]).forEach(function(d){
+      var s = serial(new Date(y, m-1, d));
+      for(var i=0;i<=carry;i++) set[s+i] = 1;
+    });
+  });
+  return set;
+}
+function runDaysInMonth(set, y, m){
+  var s = serial(new Date(y, m-1, 1)), dim = daysInMonth(y,m), c = 0;
+  for(var i=0;i<dim;i++) if(set[s+i]) c++;
+  return c;
+}
+
+function schedule(w, u, cfg){
+  if(!w.purchaseDate) return null;
+  var ms = (w.maintenances||[]).slice().sort(function(a,b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+  var last = ms.length ? ms[ms.length-1].date : null;
+  var baseStr = last || w.purchaseDate;
+  var base = parseYMD(baseStr), now = today();
+
+  var interval = cfg.intervalYears || 4;
+  var maxY     = Math.max(interval, cfg.maxYears || 8);
+  var carry    = cfg.carryDays == null ? 2 : cfg.carryDays;
+
+  var rawDue = addYears(base, interval);
+  var maxDue = addYears(base, maxY);
+  var capDays = diffDays(rawDue, maxDue);
+
+  var rs = runningSet(u, carry);
+  var mm = (u && u.months) || {};
+  var touched = {}; ((u && u.touched) || []).forEach(function(k){ touched[k] = 1; });
+
+  var months = completeMonths(base, now), rows = [], ext = 0;
+  for(var i=0;i<months.length;i++){
+    var y = months[i].y, m = months[i].m, key = mkey(y,m);
+    var used = (mm[key]||[]).length;
+    var dim  = daysInMonth(y,m);
+    var recorded = !!touched[key] || used>0;
+    var run, add;
+    if(cfg.countMode==='touched' && !recorded){ run = dim; add = 0; }
+    else { run = Math.min(dim, runDaysInMonth(rs, y, m)); add = dim - run; }
+    ext += add;
+    rows.push({key:key, y:y, m:m, used:used, run:run, dim:dim, add:add,
+               recorded:recorded, cum:ext, cumApplied:Math.min(ext, capDays)});
+  }
+
+  var extApplied = Math.min(ext, capDays);
+  var due  = addDays(rawDue, extApplied);
+  var span = Math.max(1, diffDays(base, due));
+  return {
+    base:base, baseStr:baseStr, baseKind: last ? 'maintenance' : 'purchase',
+    rawDue:rawDue, maxDue:maxDue, capDays:capDays,
+    ext:ext, extApplied:extApplied, capped: ext > capDays,
+    due:due, remaining: diffDays(now, due),
+    progress: Math.max(0, Math.min(1, diffDays(base, now)/span)),
+    rows:rows, maints:ms, interval:interval, maxY:maxY, carry:carry
+  };
+}
+
+function statusOf(s){
+  if(!s) return {cls:'s-none', label:'購入日が未入力'};
+  if(s.remaining < 0)    return {cls:'s-over', label:'期限超過'};
+  if(s.remaining <= 180) return {cls:'s-soon', label:'要点検'};
+  return {cls:'s-ok', label:'良好'};
+}
+
+/* ============ render ============ */
+function render(){
+  if(view.name==='detail' && !state.watches[view.id]) view = {name:'list', tab:'overview'};
+  $('#app').innerHTML = view.name==='detail' ? detailHTML(view.id, state.config) : listHTML(state.config);
+  $('#foot').innerHTML = footHTML();
+}
+
+function renderBanner(){
+  var b = $('#banner');
+  if(mode==='local' && fileHandle && filePerm!=='granted'){
+    b.innerHTML = '<div class="alert"><span><b>データファイルが未接続です。</b> '
+      + esc(fileName || '保存先ファイル') + ' への自動保存を再開するには許可が必要です。</span>'
+      + '<button class="btn btn-sm" data-act="reconnect">接続する</button></div>';
+  } else b.innerHTML = '';
+}
+
+function footHTML(){
+  var c = state.config;
+  return '次回メンテナンス＝起算日の ' + (c.intervalYears||4) + ' 年後 ＋ 停止していた日数（上限 ' + (c.maxYears||8) + ' 年）。'
+       + '実質稼働日数＝着用した日とその後 ' + (c.carryDays==null?2:c.carryDays) + ' 日間。'
+       + (mode==='db' ? ' データはクラウドに同期されています。'
+                      : (filePerm==='granted' ? ' 変更のたびに ' + esc(fileName) + ' へ自動保存されます。'
+                                              : ' データはこのブラウザに保存されています。設定からデータファイルに接続すると自動保存できます。'));
+}
+
+function summary(cfg){
+  var ids = Object.keys(state.watches);
+  var over = 0, soon = 0, next = null, spend = 0;
+  ids.forEach(function(id){
+    var w = state.watches[id];
+    (w.maintenances||[]).forEach(function(m){ spend += Number(m.cost)||0; });
+    var s = schedule(w, state.usage[id], cfg);
+    if(!s) return;
+    if(s.remaining < 0) over++; else if(s.remaining <= 180) soon++;
+    if(!next || s.remaining < next.rem) next = {rem:s.remaining, name:w.model};
+  });
+  return {n:ids.length, over:over, soon:soon, next:next, spend:spend};
+}
+
+function listHTML(cfg){
+  var ids = Object.keys(state.watches);
+  if(!ids.length){
+    return '<div style="height:28px"></div><div class="empty">'
+      + '<h2>まだ 1 本も登録されていません</h2>'
+      + '<p>時計を登録し、着けた日をカレンダーで記録していくと、'
+      + 'ゼンマイが動いていた日数から次回オーバーホールの時期と残り日数を自動で計算します。</p>'
+      + '<div class="acts">'
+      + '<button class="btn btn-primary" data-act="add">時計を追加</button>'
+      + '<button class="btn" data-act="sample">サンプルを読み込む</button>'
+      + '</div></div>';
+  }
+
+  var s = summary(cfg);
+  var nextTxt = s.next ? (s.next.rem < 0 ? '超過 ' + Math.abs(s.next.rem) : String(s.next.rem)) : '—';
+
+  var h = '<div class="strip">'
+    + '<div><div class="k">保有本数</div><div class="v">' + s.n + '<small>本</small></div></div>'
+    + '<div><div class="k">直近の期限まで</div><div class="v">' + nextTxt + '<small>日</small></div></div>'
+    + '<div><div class="k">要対応</div><div class="v">' + (s.over + s.soon) + '<small>本</small></div></div>'
+    + '<div><div class="k">メンテ総額</div><div class="v" style="font-size:17px">' + esc(yen(s.spend)) + '</div></div>'
+    + '</div>';
+
+  ids.sort(function(a,b){
+    var sa = schedule(state.watches[a], state.usage[a], cfg);
+    var sb = schedule(state.watches[b], state.usage[b], cfg);
+    if(!sa) return 1;
+    if(!sb) return -1;
+    return sa.remaining - sb.remaining;
+  });
+
+  h += '<div class="sec-head"><h2>コレクション</h2><span class="line"></span>'
+     + '<span class="eyebrow">期限の近い順</span></div><div class="grid">';
+
+  ids.forEach(function(id){
+    var w = state.watches[id];
+    var sc = schedule(w, state.usage[id], cfg);
+    var st = statusOf(sc);
+    var num = sc ? (sc.remaining < 0 ? Math.abs(sc.remaining) : sc.remaining) : '—';
+    var unit = sc ? (sc.remaining < 0 ? '日 超過' : '日 残り') : '';
+    h += '<button class="card ' + st.cls + '" data-open="' + esc(id) + '">'
+      + '<div class="card-top"><div style="min-width:0">'
+      + '<div class="maker">' + esc(w.maker || 'メーカー未設定') + '</div>'
+      + '<div class="model">' + esc(w.model) + '</div>'
+      + '<div class="yr">' + esc(w.modelYear ? w.modelYear + '年式' : '年式未設定')
+      + ' ・ ' + esc(w.condition || '—') + '</div>'
+      + '</div><div class="count"><div class="d">' + num + '</div><div class="u">' + unit + '</div></div></div>'
+      + '<div class="bar"><i style="width:' + (sc ? Math.round(sc.progress*100) : 0) + '%"></i></div>'
+      + '<div class="card-foot"><span class="chip">' + esc(st.label) + '</span>'
+      + '<span>次回 ' + (sc ? esc(jpDate(ymd(sc.due))) : '—')
+      + (sc && sc.extApplied ? ' <span style="color:var(--accent-2)">(+' + sc.extApplied + '日'
+          + (sc.capped ? '・上限' : '') + ')</span>' : '')
+      + '</span></div></button>';
+  });
+
+  return h + '</div>';
+}
+
+function ringSVG(pct, cls, midHTML){
+  var r = 54, c = 2*Math.PI*r, off = c * (1 - Math.max(0, Math.min(1, pct)));
+  return '<div class="ringwrap ' + cls + '">'
+    + '<svg viewBox="0 0 128 128" width="128" height="128" aria-hidden="true">'
+    + '<circle cx="64" cy="64" r="' + r + '" fill="none" stroke="var(--line)" stroke-width="9"></circle>'
+    + '<circle cx="64" cy="64" r="' + r + '" fill="none" stroke="var(--st)" stroke-width="9"'
+    + ' stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) + '"'
+    + ' stroke-dashoffset="' + off.toFixed(1) + '" transform="rotate(-90 64 64)"></circle>'
+    + '</svg>' + midHTML + '</div>';
+}
+
+function detailHTML(id, cfg){
+  var w  = state.watches[id];
+  var u  = state.usage[id] || {months:{}, touched:[]};
+  var sc = schedule(w, u, cfg);
+  var st = statusOf(sc);
+  var num = sc ? (sc.remaining < 0 ? Math.abs(sc.remaining) : sc.remaining) : '—';
+  var unit = sc ? (sc.remaining < 0 ? '日 超過' : '日 残り') : '購入日未入力';
+
+  var h = '<button class="back" data-act="back">← コレクションへ戻る</button>';
+
+  h += '<div class="hero ' + st.cls + '">'
+    + ringSVG(sc ? sc.progress : 0, st.cls,
+        '<div class="mid"><b>' + num + '</b><span>' + esc(unit) + '</span></div>')
+    + '<div class="info">'
+    + '<div class="eyebrow">' + esc(w.maker || 'メーカー未設定') + '</div>'
+    + '<h2>' + esc(w.model) + '</h2>'
+    + '<div style="margin-top:8px"><span class="chip">' + esc(st.label) + '</span>'
+    + (sc && sc.capped ? ' <span style="font-size:11.5px;color:var(--soon)">上限 ' + sc.maxY + ' 年に到達</span>' : '')
+    + '</div>'
+    + '<div class="due">'
+    + '<div><div class="k">次回メンテナンス</div><div class="v">' + (sc ? esc(jpDate(ymd(sc.due))) : '—') + '</div></div>'
+    + '<div><div class="k">起算日</div><div class="v">' + (sc ? esc(jpDate(sc.baseStr)) : '—') + '</div>'
+    + '<div style="font-size:11px;color:var(--ink-3)">' + (sc ? (sc.baseKind==='maintenance' ? '最終メンテナンス' : '購入日') : '') + '</div></div>'
+    + '<div><div class="k">停止による延長</div><div class="v">' + (sc ? '+' + sc.extApplied : '—')
+    + '<span style="font-size:11px;font-family:var(--f-body)"> 日</span></div>'
+    + (sc && sc.capped ? '<div style="font-size:11px;color:var(--soon)">計算値 +' + sc.ext + ' 日</div>' : '')
+    + '</div>'
+    + '</div>'
+    + '<div class="acts">'
+    + '<button class="btn btn-primary" data-act="addmaint">メンテナンスを記録</button>'
+    + '<button class="btn" data-act="edit">情報を編集</button>'
+    + '</div></div></div>';
+
+  var tabs = [['overview','概要'],['calendar','使用カレンダー'],['history','メンテナンス履歴'],['calc','延長の内訳']];
+  h += '<div class="tabs" role="tablist">';
+  tabs.forEach(function(t){
+    h += '<button role="tab" aria-selected="' + (view.tab===t[0]) + '" data-tab="' + t[0] + '">' + t[1] + '</button>';
+  });
+  h += '</div><div class="panel">';
+
+  if(view.tab==='overview')      h += overviewHTML(w, u, sc);
+  else if(view.tab==='calendar') h += calendarHTML(w, u, cfg);
+  else if(view.tab==='history')  h += historyHTML(w);
+  else                           h += calcHTML(sc, cfg);
+
+  return h + '</div>';
+}
+
+function overviewHTML(w, u, sc){
+  var spent = (w.maintenances||[]).reduce(function(a,m){ return a + (Number(m.cost)||0); }, 0);
+  var totalDays = 0, months = 0, mm = (u.months||{});
+  Object.keys(mm).forEach(function(k){ totalDays += mm[k].length; months++; });
+
+  var h = '<div class="spec">'
+    + cell('メーカー', w.maker)
+    + cell('購入モデル', w.model)
+    + cell('購入年式', w.modelYear ? w.modelYear + ' 年' : '', true)
+    + cell('購入時期', jpDate(w.purchaseDate), true)
+    + cell('購入店', w.shop)
+    + cell('状態', w.condition)
+    + cell('購入金額', yen(w.price), true)
+    + cell('メンテナンス総額', yen(spent), true)
+    + cell('メンテナンス回数', (w.maintenances||[]).length + ' 回', true)
+    + cell('記録済みの着用日数', totalDays + ' 日 / ' + months + ' か月', true)
+    + '</div>';
+
+  if(sc){
+    h += '<div class="note">'
+      + '<b>' + esc(jpDate(sc.baseStr)) + '</b>（' + (sc.baseKind==='maintenance' ? '最終メンテナンス' : '購入') + '）の '
+      + sc.interval + ' 年後は <b>' + esc(jpDate(ymd(sc.rawDue))) + '</b>。'
+      + (sc.extApplied
+          ? '止まっていた日数の分だけ <b>' + sc.extApplied + ' 日</b>（約 ' + (sc.extApplied/30).toFixed(1) + ' か月）繰り延べて、次回は <b>' + esc(jpDate(ymd(sc.due))) + '</b> です。'
+          : '現時点で繰り延べはありません。')
+      + '</div>';
+    if(sc.capped){
+      h += '<div class="note cap">計算上の延長は <b>+' + sc.ext + ' 日</b> ですが、使用頻度にかかわらず'
+         + '<b>上限 ' + sc.maxY + ' 年</b>（' + esc(jpDate(ymd(sc.maxDue))) + '）で打ち切っています。'
+         + '油脂の劣化は動かしていなくても進むためです。</div>';
+    }
+  }else{
+    h += '<div class="note">購入時期を入力すると、次回メンテナンス時期の計算が始まります。</div>';
+  }
+  return h;
+}
+function cell(k, v, mono){
+  return '<div><div class="k">' + esc(k) + '</div><div class="v' + (mono?' mono':'') + '">'
+       + esc(v == null || v === '' ? '—' : v) + '</div></div>';
+}
+
+function calendarHTML(w, u, cfg){
+  var now = today();
+  if(!cal) cal = {y:now.getFullYear(), m:now.getMonth()+1};
+  var carry = cfg.carryDays == null ? 2 : cfg.carryDays;
+  var key = mkey(cal.y, cal.m);
+  var days = (u.months && u.months[key]) || [];
+  var worn = {}; days.forEach(function(d){ worn[d]=1; });
+  var touched = ((u.touched)||[]).indexOf(key) >= 0 || days.length > 0;
+  var dim = daysInMonth(cal.y, cal.m);
+  var startDow = new Date(cal.y, cal.m-1, 1).getDay();
+  var first = serial(new Date(cal.y, cal.m-1, 1));
+
+  var rs = runningSet(u, carry);
+  var run = 0;
+  for(var i=0;i<dim;i++) if(rs[first+i]) run++;
+  var add = dim - run;
+
+  var isFutureMonth = (cal.y > now.getFullYear()) || (cal.y===now.getFullYear() && cal.m > now.getMonth()+1);
+  var isCurrent = (cal.y===now.getFullYear() && cal.m===now.getMonth()+1);
+
+  var h = '<div class="calbar">'
+    + '<span class="mo">' + cal.y + '年 ' + cal.m + '月</span>'
+    + '<button class="btn btn-ghost btn-sm" data-act="thismonth">今月へ</button>'
+    + '<span class="nav"><button class="btn" data-act="prevmo" aria-label="前の月">‹</button>'
+    + '<button class="btn" data-act="nextmo" aria-label="次の月"' + (isFutureMonth?' disabled':'') + '>›</button></span>'
+    + '</div>';
+
+  h += '<div class="dow"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>';
+  h += '<div class="days">';
+  for(var b=0;b<startDow;b++) h += '<div class="day blank"></div>';
+  for(var d=1; d<=dim; d++){
+    var dd = new Date(cal.y, cal.m-1, d);
+    var future = dd > now;
+    var isToday = ymd(dd) === ymd(now);
+    var cls = worn[d] ? ' on' : (rs[first+d-1] ? ' run' : '');
+    h += '<button class="day' + cls + (isToday?' today':'') + '"'
+       + (future?' disabled':'') + ' data-day="' + d + '"'
+       + ' aria-pressed="' + (!!worn[d]) + '" aria-label="' + cal.m + '月' + d + '日">' + d + '</button>';
+  }
+  h += '</div>';
+
+  h += '<div class="legend">'
+     + '<span><i class="w"></i>着用した日</span>'
+     + '<span><i class="r"></i>ゼンマイで稼働中（着用の ' + carry + ' 日後まで）</span>'
+     + '<span><i class="n"></i>停止</span></div>';
+
+  h += '<div class="mstats">'
+    + '<div><div class="k">着用日数</div><div class="v">' + days.length + '</div></div>'
+    + '<div><div class="k">実質稼働日数</div><div class="v">' + run + ' <span style="font-size:11px;color:var(--ink-3)">/ ' + dim + '</span></div></div>'
+    + '<div><div class="k">延長</div><div class="v" style="color:' + (add?'var(--accent-2)':'var(--ink-3)') + '">+' + add + '</div></div>'
+    + '</div>';
+
+  h += '<label class="rec"><input type="checkbox" id="recChk"' + (touched?' checked':'')
+     + (days.length?' disabled':'') + '>'
+     + '<span>この月を記録済みにする' + (days.length ? '（着用日があるため自動で記録済み）' : '（1 日も着けなかった月として延長に算入）') + '</span></label>';
+
+  h += '<div class="note">'
+     + '着けた日から <b>' + carry + ' 日後</b>までは巻き上げたゼンマイで動き続けているものとして、稼働日に数えます。'
+     + '例えば 1 日に着け、2 日は着けず、3 日にまた着けた場合は 1〜5 日の <b>5 日</b>が稼働日です。'
+     + '止まっていた日数（' + dim + ' − 稼働）の分だけ次回メンテナンスを先送りします。'
+     + (isCurrent ? '<br>今月は進行中のため、月が明けてから計算に算入されます。'
+                  : ((cfg.countMode==='touched' && !touched) ? '<br>この月は未記録のため、現在の設定では延長に算入されていません。' : ''))
+     + '</div>';
+  return h;
+}
+
+function historyHTML(w){
+  var ms = (w.maintenances||[]).slice().sort(function(a,b){ return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+  var h = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">'
+    + '<span class="eyebrow">' + ms.length + ' 件の記録</span>'
+    + '<button class="btn btn-primary" data-act="addmaint">メンテナンスを記録</button></div>';
+
+  if(!ms.length){
+    h += '<div class="empty" style="padding:30px 20px"><p style="margin-bottom:0">'
+       + 'まだメンテナンス記録がありません。現在は購入日を起算日として計算しています。</p></div>';
+    return h;
+  }
+  h += '<div class="hist">';
+  ms.forEach(function(m, i){
+    h += '<div class="hrow"><div style="min-width:0">'
+      + '<div class="d">' + esc(jpDate(m.date)) + (i===0 ? ' ・ 最新' : '') + '</div>'
+      + '<div class="c">' + esc(m.content || 'オーバーホール') + '</div>'
+      + '<div class="s">' + esc(m.shop || '店舗未記入') + '</div></div>'
+      + '<div style="display:flex;gap:10px;align-items:flex-start">'
+      + '<div class="amt">' + esc(yen(m.cost)) + '</div>'
+      + '<button class="btn btn-ghost" data-delmaint="' + esc(m.id) + '" title="削除" style="padding:2px 7px;font-size:16px;line-height:1.2">×</button>'
+      + '</div></div>';
+  });
+  h += '</div>';
+  var tot = ms.reduce(function(a,m){ return a + (Number(m.cost)||0); }, 0);
+  h += '<div class="note"><b>累計 ' + esc(yen(tot)) + '</b>／' + ms.length + ' 回。'
+     + '最新の ' + esc(jpDate(ms[0].date)) + ' を起算日として次回を計算しています。</div>';
+  return h;
+}
+
+function calcHTML(sc, cfg){
+  if(!sc) return '<p style="color:var(--ink-2)">購入時期が未入力のため計算できません。</p>';
+  var rows = sc.rows;
+  if(!rows.length) return '<p style="color:var(--ink-2)">起算日（' + esc(jpDate(sc.baseStr)) + '）から完全に経過した月がまだありません。</p>';
+
+  var shown = view.showAll ? rows.slice().reverse() : rows.slice(-24).reverse();
+  var h = '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap">'
+    + '<span class="eyebrow">月別の延長計算</span>'
+    + '<span style="font-size:12.5px;color:var(--ink-2)">対象 ' + rows.length + ' か月 ／ 適用 <b style="color:var(--accent-2)">+'
+    + sc.extApplied + ' 日</b>' + (sc.capped ? '（計算値 +' + sc.ext + ' 日／上限で打ち切り）' : '') + '</span></div>';
+
+  h += '<div class="tblwrap"><table><thead><tr>'
+    + '<th>月</th><th>着用</th><th>稼働</th><th>月日数</th><th>延長</th><th>累計</th>'
+    + '</tr></thead><tbody>';
+  shown.forEach(function(r){
+    var overCap = r.cum > sc.capDays;
+    h += '<tr class="' + (!r.recorded ? 'unrec' : (r.add ? 'gain' : '')) + (overCap ? ' over' : '') + '">'
+      + '<td>' + r.y + '.' + pad(r.m) + (!r.recorded ? ' <span style="font-family:var(--f-body);font-size:11px">未記録</span>' : '') + '</td>'
+      + '<td>' + r.used + '</td><td>' + r.run + '</td><td>' + r.dim + '</td>'
+      + '<td style="color:' + (r.add?'var(--accent-2)':'inherit') + '">' + (r.add ? '+' + r.add : '0') + '</td>'
+      + '<td>' + r.cumApplied + (overCap ? ' <span style="font-family:var(--f-body);font-size:10.5px;color:var(--soon)">上限</span>' : '') + '</td></tr>';
+  });
+  h += '</tbody><tfoot><tr><td>適用合計</td><td colspan="3"></td><td>+' + sc.extApplied + '</td><td>' + sc.extApplied + '</td></tr></tfoot></table></div>';
+
+  if(rows.length > 24){
+    h += '<div style="margin-top:12px"><button class="btn" data-act="toggleall">'
+       + (view.showAll ? '直近 24 か月だけ表示' : 'すべての ' + rows.length + ' か月を表示') + '</button></div>';
+  }
+  h += '<div class="note">'
+     + '起算日 <b>' + esc(jpDate(sc.baseStr)) + '</b> ＋ ' + sc.interval + ' 年 ＝ ' + esc(jpDate(ymd(sc.rawDue)))
+     + '、延長 <b>+' + sc.extApplied + ' 日</b> を加えて <b>' + esc(jpDate(ymd(sc.due))) + '</b>。'
+     + '<br>「稼働」は着用した日とその後 ' + sc.carry + ' 日を合わせた日数（月をまたぐ分も含む）。起算月と今月は途中の月のため対象外です。'
+     + (cfg.countMode==='touched'
+        ? '<br>未記録の月は通常使用とみなし、延長しません（設定で変更できます）。'
+        : '<br>未記録の月は着用 0 日として扱っています。')
+     + '</div>';
+  if(sc.capped){
+    h += '<div class="note cap">上限 <b>' + sc.maxY + ' 年</b>（' + esc(jpDate(ymd(sc.maxDue)))
+       + '）を超える分の延長は切り捨てています。</div>';
+  }
+  return h;
+}
+
+/* ============ combobox ============ */
+function comboListHTML(filter){
+  var f = (filter||'').trim().toLowerCase();
+  var h = '', hits = 0;
+  MAKERS.forEach(function(g){
+    var items = g[1].filter(function(n){ return !f || n.toLowerCase().indexOf(f) >= 0; });
+    if(!items.length) return;
+    hits += items.length;
+    h += '<div class="g">' + esc(g[0]) + '</div>';
+    items.forEach(function(n){ h += '<button type="button" data-maker="' + esc(n) + '">' + esc(n) + '</button>'; });
+  });
+  if(!hits) h = '<div class="none">一致するメーカーがありません。そのまま入力すれば登録できます。</div>';
+  return h;
+}
+function comboOpen(open, filter){
+  var list = $('#makerList'); if(!list) return;
+  if(open){ list.innerHTML = comboListHTML(filter); list.hidden = false; list.scrollTop = 0; }
+  else list.hidden = true;
+}
+
+/* ============ modals ============ */
+function closeModal(){ $('#modalRoot').innerHTML = ''; }
+function openModal(html){
+  $('#modalRoot').innerHTML = '<div class="veil" id="veil"><div class="modal" role="dialog" aria-modal="true">' + html + '</div></div>';
+  var f = $('#modalRoot input, #modalRoot select, #modalRoot textarea');
+  if(f) f.focus();
+}
+
+function watchForm(id){
+  var w = id ? state.watches[id] : {condition:'新品'};
+  var isNew = !id;
+  var h = '<h3>' + (isNew ? '時計を追加' : '情報を編集') + '</h3>'
+    + '<div class="sub">購入時期は次回メンテナンスの起算日になります。</div>'
+    + '<div class="fields">'
+    + '<label class="full"><span class="lb">購入モデル</span><input id="f_model" value="' + esc(w.model||'') + '" placeholder="例：Seamaster Diver 300M"></label>'
+    + '<div class="full"><span class="lb">メーカー（一覧から選ぶか、直接入力）</span>'
+    + '<div class="combo" id="makerCombo">'
+    + '<input id="f_maker" autocomplete="off" value="' + esc(w.maker||'') + '" placeholder="例：OMEGA">'
+    + '<button type="button" class="combo-tog" data-combo-toggle aria-label="メーカー一覧を開く">▼</button>'
+    + '<div class="combo-list" id="makerList" hidden></div>'
+    + '</div></div>'
+    + '<label><span class="lb">購入年式</span><input id="f_year" type="number" min="1900" max="2100" step="1" value="' + esc(w.modelYear||'') + '" placeholder="2021"></label>'
+    + '<label><span class="lb">購入時期</span><input id="f_pdate" type="date" value="' + esc(w.purchaseDate||'') + '"></label>'
+    + '<label><span class="lb">購入金額（円）</span><input id="f_price" type="number" min="0" step="1000" value="' + esc(w.price==null?'':w.price) + '" placeholder="580000"></label>'
+    + '<label><span class="lb">購入店</span><input id="f_shop" value="' + esc(w.shop||'') + '" placeholder="例：正規店 銀座"></label>'
+    + '<div class="full"><span class="lb">状態</span><div class="seg" id="f_cond">'
+    + '<button type="button" data-cond="新品" aria-pressed="' + ((w.condition||'新品')==='新品') + '">新品</button>'
+    + '<button type="button" data-cond="中古" aria-pressed="' + (w.condition==='中古') + '">中古</button>'
+    + '</div></div>'
+    + '</div><div class="err" id="f_err"></div>'
+    + '<div class="modal-acts">'
+    + (isNew ? '' : '<button class="btn btn-danger left" data-act="delete" data-id="' + esc(id) + '">この時計を削除</button>')
+    + '<button class="btn" data-act="cancel">キャンセル</button>'
+    + '<button class="btn btn-primary" data-act="savewatch" data-id="' + esc(id||'') + '">保存</button>'
+    + '</div>';
+  openModal(h);
+}
+
+function maintForm(id){
+  var h = '<h3>メンテナンスを記録</h3>'
+    + '<div class="sub">最新の記録日が、次回メンテナンスの起算日になります。</div>'
+    + '<div class="fields">'
+    + '<label><span class="lb">メンテナンス時期</span><input id="m_date" type="date" value="' + esc(ymd(today())) + '"></label>'
+    + '<label><span class="lb">メンテナンス金額（円）</span><input id="m_cost" type="number" min="0" step="1000" placeholder="72000"></label>'
+    + '<label class="full"><span class="lb">メンテナンス店</span><input id="m_shop" placeholder="例：メーカーサービスセンター"></label>'
+    + '<label class="full"><span class="lb">内容</span><input id="m_content" placeholder="オーバーホール、パッキン交換 など"></label>'
+    + '</div><div class="err" id="m_err"></div>'
+    + '<div class="modal-acts">'
+    + '<button class="btn" data-act="cancel">キャンセル</button>'
+    + '<button class="btn btn-primary" data-act="savemaint" data-id="' + esc(id) + '">記録する</button>'
+    + '</div>';
+  openModal(h);
+}
+
+function settingsForm(){
+  var c = state.config;
+  var h = '<h3>設定</h3><div class="sub">すべての時計に適用されます。</div>'
+    + '<div class="fields">'
+    + '<label><span class="lb">メンテナンス周期（年）</span>'
+    + '<input id="s_years" type="number" min="1" max="20" step="1" value="' + esc(c.intervalYears||4) + '"></label>'
+    + '<label><span class="lb">上限（年）</span>'
+    + '<input id="s_max" type="number" min="1" max="30" step="1" value="' + esc(c.maxYears||8) + '"></label>'
+    + '<label class="full"><span class="lb">着用後に動き続ける日数（パワーリザーブ）</span>'
+    + '<input id="s_carry" type="number" min="0" max="10" step="1" value="' + esc(c.carryDays==null?2:c.carryDays) + '"></label>'
+    + '<div class="full"><span class="lb">未記録の月の扱い</span><div class="seg" id="s_mode">'
+    + '<button type="button" data-mode="touched" aria-pressed="' + (c.countMode==='touched') + '">通常使用とみなす</button>'
+    + '<button type="button" data-mode="all" aria-pressed="' + (c.countMode==='all') + '">着用 0 日とする</button>'
+    + '</div></div></div>'
+    + '<div class="note" style="margin-top:16px">'
+    + '延長は「その月の日数 − 稼働日数」。稼働日数は着用した日とその後の日数を合わせたものです。'
+    + '使用頻度にかかわらず、次回メンテナンスは起算日から<b>上限の年数</b>を超えません。'
+    + '<br>「通常使用とみなす」なら、カレンダーに入力した月だけが延長の対象になります。記録し忘れた月で期限が意図せず延びるのを防げます。'
+    + '</div>';
+
+  if(!IS_HOSTED){
+    var linked = fileHandle && filePerm === 'granted';
+    h += '<div class="dsec"><span class="lb">データの保存先</span>'
+      + '<p>' + (linked
+          ? '<b style="color:var(--ok)">' + esc(fileName) + '</b> に自動保存しています（このブラウザにも控えを保持）。'
+          : 'このブラウザの中だけに保存しています。PC のバックアップに含めたい場合や、'
+            + '閲覧データの削除で消えるのを避けたい場合は、保存先ファイルを指定してください。') + '</p>'
+      + '<div class="row">'
+      + (window.showSaveFilePicker
+          ? (linked ? '<button class="btn btn-sm" data-act="unlinkfile">接続を解除</button>'
+                    : '<button class="btn btn-sm btn-primary" data-act="linkfile">データファイルを指定</button>')
+          : '')
+      + '<button class="btn btn-sm" data-act="export">バックアップを書き出す</button>'
+      + '<button class="btn btn-sm" data-act="import">バックアップを読み込む</button>'
+      + '</div></div>';
+  }
+
+  h += '<div class="modal-acts"><button class="btn" data-act="cancel">キャンセル</button>'
+     + '<button class="btn btn-primary" data-act="savecfg">保存</button></div>';
+  openModal(h);
+}
+
+var toastTimer = null;
+function toast(msg){
+  var old = $('.toast'); if(old) old.remove();
+  var el = document.createElement('div');
+  el.className = 'toast'; el.textContent = msg; el.setAttribute('role','status');
+  document.body.appendChild(el);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.remove(); }, 4200);
+}
+
+/* ============ events ============ */
+document.addEventListener('click', function(e){
+  if(e.target.id === 'veil'){ closeModal(); return; }
+  var t = e.target.closest('[data-open],[data-act],[data-tab],[data-day],[data-cond],[data-mode],[data-delmaint],[data-combo-toggle],[data-maker]');
+
+  /* close the maker list on any click outside it */
+  var list = $('#makerList');
+  if(list && !list.hidden && !e.target.closest('#makerCombo')) list.hidden = true;
+
+  if(!t) return;
+  var act = t.getAttribute('data-act');
+
+  if(t.hasAttribute('data-combo-toggle')){
+    var l = $('#makerList');
+    comboOpen(l.hidden, l.hidden ? $('#f_maker').value : '');
+    return;
+  }
+  if(t.hasAttribute('data-maker')){
+    $('#f_maker').value = t.getAttribute('data-maker');
+    comboOpen(false);
+    return;
+  }
+
+  if(t.hasAttribute('data-open')){
+    view = {name:'detail', id:t.getAttribute('data-open'), tab:'overview', showAll:false};
+    cal = null; window.scrollTo(0,0); render(); return;
+  }
+  if(t.hasAttribute('data-tab')){ view.tab = t.getAttribute('data-tab'); render(); return; }
+
+  if(t.hasAttribute('data-cond') || t.hasAttribute('data-mode')){
+    Array.prototype.forEach.call(t.parentNode.children, function(b){ b.setAttribute('aria-pressed', b===t); });
+    return;
+  }
+
+  if(t.hasAttribute('data-day')){
+    var d = +t.getAttribute('data-day');
+    var u = state.usage[view.id] ? clone(state.usage[view.id]) : {months:{}, touched:[]};
+    u.months = u.months || {}; u.touched = u.touched || [];
+    var key = mkey(cal.y, cal.m);
+    var arr = (u.months[key] || []).slice();
+    var i = arr.indexOf(d);
+    if(i >= 0) arr.splice(i,1); else { arr.push(d); arr.sort(function(a,b){return a-b;}); }
+    u.months[key] = arr;
+    if(u.touched.indexOf(key) < 0) u.touched.push(key);
+    putUsage(view.id, u);
+    return;
+  }
+
+  if(t.hasAttribute('data-delmaint')){
+    var mid = t.getAttribute('data-delmaint');
+    var w2 = clone(state.watches[view.id]);
+    w2.maintenances = (w2.maintenances||[]).filter(function(m){ return m.id !== mid; });
+    putWatch(view.id, w2);
+    toast('メンテナンス記録を削除しました');
+    return;
+  }
+
+  switch(act){
+    case 'add':        watchForm(null); break;
+    case 'back':       view = {name:'list', tab:'overview'}; window.scrollTo(0,0); render(); break;
+    case 'edit':       watchForm(view.id); break;
+    case 'addmaint':   maintForm(view.id); break;
+    case 'cancel':     closeModal(); break;
+    case 'toggleall':  view.showAll = !view.showAll; render(); break;
+    case 'thismonth':  var n = today(); cal = {y:n.getFullYear(), m:n.getMonth()+1}; render(); break;
+    case 'prevmo':     cal.m--; if(cal.m<1){cal.m=12; cal.y--;} render(); break;
+    case 'nextmo':     cal.m++; if(cal.m>12){cal.m=1; cal.y++;} render(); break;
+    case 'sample':     loadSample(); break;
+    case 'linkfile':   linkFile(); break;
+    case 'unlinkfile': unlinkFile(); break;
+    case 'reconnect':  reconnectFile(true); break;
+    case 'export':     exportBackup(); break;
+    case 'import':     $('#impFile').click(); break;
+
+    case 'savewatch': {
+      var id2 = t.getAttribute('data-id') || '';
+      var model = $('#f_model').value.trim();
+      if(!model){ $('#f_err').textContent = '購入モデル名を入力してください。'; $('#f_model').focus(); return; }
+      var prev = id2 ? state.watches[id2] : null;
+      var cond = $('#f_cond').querySelector('[aria-pressed="true"]');
+      var w3 = {
+        model: model,
+        maker: $('#f_maker').value.trim(),
+        modelYear: $('#f_year').value ? +$('#f_year').value : null,
+        purchaseDate: $('#f_pdate').value || '',
+        price: $('#f_price').value !== '' ? +$('#f_price').value : null,
+        shop: $('#f_shop').value.trim(),
+        condition: cond ? cond.getAttribute('data-cond') : '新品',
+        maintenances: prev ? (prev.maintenances||[]) : [],
+        createdAt: prev ? prev.createdAt : new Date().toISOString()
+      };
+      var newId = id2 || uid();
+      putWatch(newId, w3);
+      closeModal();
+      if(!id2){ view = {name:'detail', id:newId, tab:'overview', showAll:false}; cal=null; render(); }
+      toast(id2 ? '保存しました' : '「' + model + '」を追加しました');
+      break;
+    }
+
+    case 'savemaint': {
+      var wid = t.getAttribute('data-id');
+      var date = $('#m_date').value;
+      if(!date){ $('#m_err').textContent = 'メンテナンス時期を入力してください。'; return; }
+      var w4 = clone(state.watches[wid]);
+      w4.maintenances = (w4.maintenances||[]).concat([{
+        id: 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+        date: date,
+        cost: $('#m_cost').value !== '' ? +$('#m_cost').value : null,
+        shop: $('#m_shop').value.trim(),
+        content: $('#m_content').value.trim()
+      }]);
+      putWatch(wid, w4);
+      closeModal();
+      toast('メンテナンスを記録しました。起算日を更新しました。');
+      break;
+    }
+
+    case 'savecfg': {
+      var yrs = +$('#s_years').value || 4;
+      var mx  = +$('#s_max').value || 8;
+      var cy  = $('#s_carry').value === '' ? 2 : +$('#s_carry').value;
+      var md  = $('#s_mode').querySelector('[aria-pressed="true"]');
+      yrs = Math.max(1, Math.min(20, yrs));
+      putConfig({
+        intervalYears: yrs,
+        maxYears: Math.max(yrs, Math.min(30, mx)),
+        carryDays: Math.max(0, Math.min(10, cy)),
+        countMode: md ? md.getAttribute('data-mode') : 'touched'
+      });
+      closeModal();
+      toast('設定を保存しました');
+      break;
+    }
+
+    case 'delete': {
+      var did = t.getAttribute('data-id');
+      var nm = state.watches[did] ? state.watches[did].model : '';
+      if(t.getAttribute('data-confirm') !== '1'){
+        t.setAttribute('data-confirm','1');
+        t.textContent = '本当に削除しますか？';
+        return;
+      }
+      removeWatch(did);
+      closeModal();
+      view = {name:'list', tab:'overview'};
+      render();
+      toast('「' + nm + '」を削除しました');
+      break;
+    }
+  }
+});
+
+document.addEventListener('input', function(e){
+  if(e.target.id === 'f_maker') comboOpen(true, e.target.value);
+});
+
+document.addEventListener('change', function(e){
+  if(e.target.id !== 'recChk') return;
+  var u = state.usage[view.id] ? clone(state.usage[view.id]) : {months:{}, touched:[]};
+  u.months = u.months || {}; u.touched = u.touched || [];
+  var key = mkey(cal.y, cal.m);
+  var i = u.touched.indexOf(key);
+  if(e.target.checked){ if(i<0) u.touched.push(key); }
+  else { if(i>=0) u.touched.splice(i,1); delete u.months[key]; }
+  putUsage(view.id, u);
+});
+
+document.addEventListener('keydown', function(e){
+  if(e.key !== 'Escape') return;
+  var list = $('#makerList');
+  if(list && !list.hidden){ list.hidden = true; return; }
+  if($('#veil')) closeModal();
+});
+
+$('#btnAdd').addEventListener('click', function(){ watchForm(null); });
+$('#btnSettings').addEventListener('click', settingsForm);
+
+/* ============ sample data ============ */
+function loadSample(){
+  var n = today();
+  function back(months, day){ return ymd(new Date(n.getFullYear(), n.getMonth() - months, day)); }
+  var a = uid(), b = uid();
+  var wa = { model:'サンプル：Datejust 36', maker:'ROLEX', modelYear:2016, purchaseDate: back(46, 12),
+             price:980000, shop:'サンプル：正規店', condition:'中古', maintenances:[], createdAt:new Date().toISOString() };
+  var wb = { model:'サンプル：Speedmaster Pro', maker:'OMEGA', modelYear:2019, purchaseDate: back(70, 3),
+             price:640000, shop:'サンプル：百貨店', condition:'新品',
+             maintenances:[{id:'ms1', date: back(20, 8), cost:88000, shop:'サンプル：サービスセンター', content:'オーバーホール一式'}],
+             createdAt:new Date().toISOString() };
+
+  function pattern(step){
+    var months = {}, touched = [];
+    for(var k=1;k<=18;k++){
+      var d = new Date(n.getFullYear(), n.getMonth()-k, 1);
+      var y = d.getFullYear(), m = d.getMonth()+1;
+      var key = mkey(y,m), dim = daysInMonth(y,m), days = [];
+      for(var dd=1+((k)%step); dd<=dim; dd+=step) days.push(dd);
+      months[key] = days; touched.push(key);
+    }
+    return {months:months, touched:touched};
+  }
+  putWatch(a, wa); putUsage(a, pattern(6));   /* 6 日に 1 回 → よく止まる */
+  putWatch(b, wb); putUsage(b, pattern(3));   /* 3 日に 1 回 → ほぼ動き続ける */
+  toast('サンプル 2 本を読み込みました。不要になったら各時計の「情報を編集」から削除できます。');
+}
+
+/* ============ boot & sync ============ */
+function badge(txt, title){
+  var el = $('#modeBadge');
+  el.textContent = txt;
+  el.title = title || '';
+}
+function onDbErr(e){
+  if(e && e.code === 'revoked') return;
+  toast('同期エラー（' + (e && e.code || '不明') + '）');
+}
+function subscribe(){
+  try{
+    DB.collection('watches').onSnapshot(function(s){
+      var o = {}; s.docs.forEach(function(d){ o[d.id] = d.data(); });
+      state.watches = o; render();
+    }, onDbErr);
+    DB.collection('usage').onSnapshot(function(s){
+      var o = {}; s.docs.forEach(function(d){ o[d.id] = d.data(); });
+      state.usage = o; render();
+    }, onDbErr);
+    DB.doc('config/app').onSnapshot(function(s){
+      if(s.exists) state.config = Object.assign({}, DEFAULT_CFG, s.data());
+      render();
+    }, onDbErr);
+  }catch(e){ onDbErr(e); }
+}
+
+async function connect(){
+  var db = null;
+  try{ db = window.claude && window.claude.use ? await window.claude.use('db') : null; }catch(e){ db = null; }
+  if(!db){
+    badge('この PC に保存', 'データはこの PC 内に保存されます。');
+    /* local mode: pick up a previously linked data file */
+    try{
+      var h = await idbGet('fileHandle');
+      if(h){ fileHandle = h; await reconnectFile(false); }
+    }catch(e){}
+    renderBanner(); render();
+    return;
+  }
+  DB = db;
+  try{
+    var snap = await DB.collection('watches').get();
+    if(snap.empty && Object.keys(state.watches).length) await pushAllToDb();
+  }catch(e){ badge('この PC に保存'); onDbErr(e); return; }
+  mode = 'db';
+  badge('クラウド同期', 'データはこのアーティファクトに保存され、どの端末からでも同じ内容が見られます。');
+  subscribe();
+}
+
+loadLocal();
+render();
+renderBanner();
+connect();
+
+})();
+</script>
+
+<script>
+/* ホーム画面アプリとして動かすための登録処理 */
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  var hadController = !!navigator.serviceWorker.controller, reloading = false;
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+  });
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    /* 初回インストール時は再読み込みしない。更新が届いたときだけ読み直す */
+    if(!hadController || reloading) return;
+    reloading = true;
+    location.reload();
+  });
+  /* 端末の空き容量が減ったときにデータを消されにくくする */
+  if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){});
+})();
+</script>
+</body>
+</html>
