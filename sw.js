@@ -1,8 +1,8 @@
-/* 時計メンテナンス台帳 — service worker
+﻿/* 時計メンテナンス台帳 — service worker
    アプリ本体と Google Fonts をキャッシュし、オフラインでも起動できるようにする。
    アプリのデータ（時計・着用記録）は localStorage 側にあり、ここでは扱わない。 */
 
-var VERSION = 'v1';
+var VERSION = 'v2';
 var SHELL   = 'ledger-shell-' + VERSION;
 var FONTS   = 'ledger-fonts-' + VERSION;
 var ASSETS  = [
