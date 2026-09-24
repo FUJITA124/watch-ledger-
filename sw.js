@@ -2,7 +2,7 @@
    アプリ本体と Google Fonts をキャッシュし、オフラインでも起動できるようにする。
    アプリのデータ（時計・着用記録）は localStorage 側にあり、ここでは扱わない。 */
 
-var VERSION = 'v2';
+var VERSION = 'v3';
 var SHELL   = 'ledger-shell-' + VERSION;
 var FONTS   = 'ledger-fonts-' + VERSION;
 var ASSETS  = [

@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#E9ECEF" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0D1115" media="(prefers-color-scheme: dark)">
-<meta name="description" content="腕時計の購入情報・着用記録・メンテナンス履歴から、次回オーバーホールの時期を管理します。">
+<meta name="theme-color" content="#E6E3DB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1114" media="(prefers-color-scheme: dark)">
+<meta name="description" content="腕時計の購入情報・着用記録・メンテナンス履歴・検討リストを管理します。">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -25,56 +25,61 @@ img{max-width:100%}
 <body>
 <title>時計メンテナンス台帳</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
+/* ===================================================================
+   Sector Dial — 文字盤の側から。分目盛りと印刷された数字。
+   =================================================================== */
 :root{
-  --bg:#E9ECEF;
-  --surface:#FFFFFF;
-  --surface-2:#F3F5F8;
-  --ink:#141A20;
-  --ink-2:#4C5866;
-  --ink-3:#7A8694;
-  --line:#D2D8DF;
-  --line-2:#B7C0C9;
-  --accent:#7A6534;
-  --accent-2:#A98F50;
-  --accent-soft:#EFE7D6;
-  --cal:#26599C;   --cal-soft:#E0E9F5;
-  --act:#B3352B;   --act-soft:#F8E3E0;
-  --ok:#186C53;    --ok-soft:#DBEDE6;
-  --soon:#A85A0A;  --soon-soft:#F8E5D0;
-  --over:#A32220;  --over-soft:#F9DEDC;
-  --shadow:0 1px 2px rgba(16,22,28,.05), 0 10px 26px -14px rgba(16,22,28,.22);
-  --radius:10px;
-  --f-display:'Zen Old Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-  --f-body:'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', system-ui, sans-serif;
-  --f-mono:'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  --bg:#E6E3DB;
+  --surface:#F7F5F0;
+  --surface-2:#EDEAE2;
+  --ink:#14161A;
+  --ink-2:#555A61;
+  --ink-3:#6E747C;
+  --line:#D5D1C6;
+  --line-2:#B2ADA0;
+  --acc:#14161A;        /* 黒い針 */
+  --on-acc:#F7F5F0;
+  --acc-soft:#E2DED3;
+  --cal:#26599C;   --cal-soft:#DFE8F4;   --cal-line:#9FB8D8;
+  --act:#B0342C;   --act-soft:#F7E2DF;   --act-line:#DCA9A3;
+  --ok:#1C6B4F;    --ok-soft:#DCEBE3;    --ok-line:#98C2AE;
+  --warn:#8A4F0B;  --warn-soft:#F6EBDA;  --warn-line:#D2B78D;
+  --over:#96261F;  --over-soft:#F7E0DD;  --over-line:#D9A49E;
+  --shadow:0 1px 2px rgba(20,22,26,.05), 0 10px 26px -16px rgba(20,22,26,.30);
+  --r:6px;
+  --f-display:'Oswald','Zen Kaku Gothic New','Hiragino Sans',sans-serif;
+  --f-body:'Zen Kaku Gothic New','Hiragino Sans','Yu Gothic',system-ui,sans-serif;
+  --f-num:'Oswald','IBM Plex Mono',monospace;
+  --f-mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+  --track:repeating-linear-gradient(90deg, var(--line-2) 0 1px, transparent 1px 6px);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#0D1115; --surface:#161B21; --surface-2:#1C232A;
-    --ink:#E7ECF1; --ink-2:#A2AEBA; --ink-3:#76828E;
-    --line:#252D35; --line-2:#3A444E;
-    --accent:#C8A96A; --accent-2:#9B865A; --accent-soft:#332A18;
-    --cal:#7FA8DD; --cal-soft:#16243A;
-    --act:#F0796F; --act-soft:#3B1D1A;
-    --ok:#4FBF9B;   --ok-soft:#12332B;
-    --soon:#E8913E; --soon-soft:#3A2814;
-    --over:#F0796F; --over-soft:#3C1D1B;
-    --shadow:0 1px 2px rgba(0,0,0,.45), 0 14px 34px -18px rgba(0,0,0,.8);
+    --bg:#0F1114; --surface:#171A1E; --surface-2:#1E2227;
+    --ink:#EDEFF2; --ink-2:#A8AEB6; --ink-3:#848B93;
+    --line:#262B31; --line-2:#3A4148;
+    --acc:#EDEFF2; --on-acc:#0F1114; --acc-soft:#262B31;
+    --cal:#78A2DD;  --cal-soft:#16233A;  --cal-line:#2F4A6E;
+    --act:#E4736A;  --act-soft:#37201D;  --act-line:#5C3630;
+    --ok:#54BC96;   --ok-soft:#123026;   --ok-line:#28513F;
+    --warn:#E0A55C; --warn-soft:#332714; --warn-line:#564225;
+    --over:#E4736A; --over-soft:#37201D; --over-line:#5C3630;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 14px 34px -20px rgba(0,0,0,.85);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0D1115; --surface:#161B21; --surface-2:#1C232A;
-  --ink:#E7ECF1; --ink-2:#A2AEBA; --ink-3:#76828E;
-  --line:#252D35; --line-2:#3A444E;
-  --accent:#C8A96A; --accent-2:#9B865A; --accent-soft:#332A18;
-  --cal:#7FA8DD; --cal-soft:#16243A;
-  --act:#F0796F; --act-soft:#3B1D1A;
-  --ok:#4FBF9B;   --ok-soft:#12332B;
-  --soon:#E8913E; --soon-soft:#3A2814;
-  --over:#F0796F; --over-soft:#3C1D1B;
-  --shadow:0 1px 2px rgba(0,0,0,.45), 0 14px 34px -18px rgba(0,0,0,.8);
+  --bg:#0F1114; --surface:#171A1E; --surface-2:#1E2227;
+  --ink:#EDEFF2; --ink-2:#A8AEB6; --ink-3:#848B93;
+  --line:#262B31; --line-2:#3A4148;
+  --acc:#EDEFF2; --on-acc:#0F1114; --acc-soft:#262B31;
+  --cal:#78A2DD;  --cal-soft:#16233A;  --cal-line:#2F4A6E;
+  --act:#E4736A;  --act-soft:#37201D;  --act-line:#5C3630;
+  --ok:#54BC96;   --ok-soft:#123026;   --ok-line:#28513F;
+  --warn:#E0A55C; --warn-soft:#332714; --warn-line:#564225;
+  --over:#E4736A; --over-soft:#37201D; --over-line:#5C3630;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 14px 34px -20px rgba(0,0,0,.85);
 }
 
 *{box-sizing:border-box}
@@ -83,275 +88,368 @@ body{
   font-family:var(--f-body); font-size:15px; line-height:1.65;
   -webkit-font-smoothing:antialiased;
 }
-.wrap{max-width:1040px; margin:0 auto; padding-inline:16px; padding-block:0 56px}
-h1,h2,h3{font-family:var(--f-display); font-weight:600; text-wrap:balance; margin:0}
+.wrap{max-width:1040px; margin:0 auto; padding-inline:16px; padding-block:0 60px}
+h1,h2,h3{margin:0; font-weight:600; text-wrap:balance}
 button{font:inherit; color:inherit; cursor:pointer; touch-action:manipulation}
-:focus-visible{outline:2px solid var(--accent-2); outline-offset:2px; border-radius:4px}
-.eyebrow{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3); font-weight:500}
+a{color:var(--cal)}
+:focus-visible{outline:2px solid var(--cal); outline-offset:2px; border-radius:3px}
+.eyebrow{font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-3); font-weight:500;
+  font-family:var(--f-display)}
+.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+.num{font-family:var(--f-num); font-variant-numeric:tabular-nums; font-weight:500}
+.t-cal{color:var(--cal)} .t-act{color:var(--act)}
 
 /* ---------- masthead ---------- */
-.mast{
-  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
-  background:color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
-}
-.mast-in{max-width:1040px; margin:0 auto; padding:14px 16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.mast{position:sticky; top:env(safe-area-inset-top,0px); z-index:30;
+  background:color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line-2)}
+.mast::after{content:''; display:block; height:5px; background:var(--track); opacity:.5}
+.mast-in{max-width:1040px; margin:0 auto; padding:12px 16px 0}
+.mrow1{display:flex; align-items:center; gap:12px}
 .brand{display:flex; align-items:baseline; gap:10px; margin-right:auto; min-width:0}
-.brand h1{font-size:19px; letter-spacing:.04em; white-space:nowrap}
-.brand .rule{height:1px; width:28px; background:var(--accent-2); flex:none; align-self:center}
-.badge{font-size:11px; padding:3px 9px; border-radius:99px; white-space:nowrap;
-  border:1px solid var(--line-2); color:var(--ink-3); background:var(--surface)}
-.btn{
-  border:1px solid var(--line-2); background:var(--surface); color:var(--ink);
-  padding:7px 14px; border-radius:8px; font-size:13.5px; font-weight:500;
-  transition:border-color .15s, background .15s;
-}
-.btn:hover{border-color:var(--accent-2)}
-.btn-primary{background:var(--accent); border-color:var(--accent); color:#fff}
-:root[data-theme="dark"] .btn-primary, :root:not([data-theme="light"]) .btn-primary{color:#17130A}
-@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .btn-primary{color:#fff}}
-.btn-primary:hover{filter:brightness(1.08); border-color:var(--accent)}
+.brand h1{font-family:var(--f-display); font-size:19px; font-weight:500; letter-spacing:.06em; white-space:nowrap}
+.mrow2{display:flex; align-items:center; gap:8px; margin-top:10px; padding-bottom:10px}
+.nav{display:flex; gap:2px; border:1px solid var(--line-2); border-radius:var(--r); padding:2px; background:var(--surface-2)}
+.nav button{border:0; background:none; padding:6px 13px; border-radius:calc(var(--r) - 2px);
+  font-size:13px; color:var(--ink-3); font-weight:500; white-space:nowrap}
+.nav button[aria-current="true"]{background:var(--acc); color:var(--on-acc)}
+.nav button .n{font-family:var(--f-num); font-size:11px; opacity:.75; margin-left:5px}
+.badge{font-size:10.5px; padding:2px 8px; border-radius:99px; white-space:nowrap;
+  border:1px solid var(--line-2); color:var(--ink-3); background:var(--surface); margin-left:auto}
+
+.btn{border:1px solid var(--line-2); background:var(--surface); color:var(--ink);
+  padding:7px 14px; border-radius:var(--r); font-size:13.5px; font-weight:500; white-space:nowrap;
+  transition:border-color .15s, background .15s}
+.btn:hover{border-color:var(--ink-3)}
+.btn-primary{background:var(--acc); border-color:var(--acc); color:var(--on-acc)}
+.btn-primary:hover{filter:brightness(1.15); border-color:var(--acc)}
 .btn-ghost{background:transparent; border-color:transparent; color:var(--ink-2); padding:7px 10px}
-.btn-ghost:hover{color:var(--ink); background:var(--surface-2); border-color:transparent}
-.btn-danger{color:var(--over); border-color:var(--over)}
+.btn-ghost:hover{background:var(--surface-2)}
+.btn-danger{color:var(--over); border-color:var(--over-line)}
 .btn-danger:hover{background:var(--over-soft)}
 .btn-sm{padding:5px 11px; font-size:12.5px}
 .btn:disabled{opacity:.4; cursor:not-allowed}
 
 .alert{display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-  background:var(--soon-soft); border:1px solid color-mix(in srgb, var(--soon) 40%, transparent);
-  color:var(--ink); border-radius:var(--radius); padding:11px 15px; margin-top:20px; font-size:13px}
-.alert b{color:var(--soon)}
+  background:var(--warn-soft); border:1px solid var(--warn-line); color:var(--ink);
+  border-radius:var(--r); padding:11px 15px; margin-top:18px; font-size:13px}
+.alert b{color:var(--warn)}
 .alert .btn{margin-left:auto}
 
-/* ---------- summary strip ---------- */
-.strip{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line);
-  border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin:22px 0 26px}
-.strip div{background:var(--surface); padding:13px 15px}
-.strip .k{font-size:10.5px; letter-spacing:.14em; color:var(--ink-3); text-transform:uppercase}
-.strip .v{font-family:var(--f-mono); font-size:21px; font-weight:500; margin-top:3px; font-variant-numeric:tabular-nums}
-.strip .v small{font-size:11px; font-family:var(--f-body); color:var(--ink-3); margin-left:3px; font-weight:400}
-@media(max-width:720px){ .strip{grid-template-columns:repeat(2,1fr)} }
+/* ---------- strips ---------- */
+.strip{display:grid; gap:1px; background:var(--line); border:1px solid var(--line);
+  border-radius:var(--r); overflow:hidden; margin:20px 0 0}
+.strip.s4{grid-template-columns:repeat(4,1fr)}
+.strip.s3{grid-template-columns:repeat(3,1fr); margin-top:10px; margin-bottom:24px}
+.strip > div{background:var(--surface); padding:11px 14px}
+.strip .k{font-size:9.5px; letter-spacing:.16em; color:var(--ink-3); text-transform:uppercase; font-family:var(--f-display)}
+.strip .v{font-family:var(--f-num); font-size:22px; font-weight:500; margin-top:2px; font-variant-numeric:tabular-nums; line-height:1.2}
+.strip .v small{font-size:10.5px; font-family:var(--f-body); color:var(--ink-3); margin-left:3px; font-weight:400}
+.strip .v.money{font-size:17px; font-family:var(--f-mono); font-weight:500}
+@media(max-width:720px){ .strip.s4{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:520px){
+  .strip.s3{grid-template-columns:1fr}
+  .strip.s3 > div{display:flex; justify-content:space-between; align-items:baseline; gap:10px}
+  .strip.s3 .v{margin-top:0}
+}
 
-/* ---------- collection ---------- */
-.sec-head{display:flex; align-items:baseline; gap:12px; margin:0 0 14px}
-.sec-head h2{font-size:15px; letter-spacing:.1em}
-.sec-head .line{flex:1; height:1px; background:var(--line)}
-.grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px}
-@media(max-width:760px){ .grid{grid-template-columns:1fr} }
+.sec-head{display:flex; align-items:center; gap:10px; margin:26px 0 12px; flex-wrap:wrap}
+.sec-head h2{font-family:var(--f-display); font-size:15px; font-weight:500; letter-spacing:.14em}
+.sec-head .line{flex:1; height:1px; background:var(--line-2); min-width:20px}
 
-.card{position:relative; text-align:left; width:100%; background:var(--surface);
-  border:1px solid var(--line); border-radius:var(--radius); padding:15px 17px 13px 20px;
-  box-shadow:var(--shadow); transition:transform .14s, border-color .14s; display:block}
-.card:hover{transform:translateY(-2px); border-color:var(--line-2)}
-.card::before{content:''; position:absolute; left:0; top:12px; bottom:12px; width:3px;
-  border-radius:0 3px 3px 0; background:var(--st)}
-.card-top{display:flex; justify-content:space-between; gap:12px; align-items:flex-start}
-.card-id{display:flex; gap:12px; min-width:0; align-items:flex-start}
-.thumb{width:54px; height:54px; border-radius:8px; object-fit:cover; flex:none;
-  border:1px solid var(--line); background:var(--surface-2)}
-.thumb.ph{display:grid; place-items:center; color:var(--ink-3); font-size:20px}
-.card .maker{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3)}
-.card .model{font-family:var(--f-display); font-size:18px; line-height:1.35; margin-top:1px}
-.card .yr{font-size:12px; color:var(--ink-3); margin-top:2px}
+/* ---------- cards ---------- */
+.grid{display:grid; grid-template-columns:repeat(2,1fr); gap:13px}
+@media(max-width:780px){ .grid{grid-template-columns:1fr} }
+
+.card{position:relative; text-align:left; width:100%; display:block;
+  background:var(--surface); border:1px solid var(--line-2); border-radius:var(--r);
+  padding:17px 15px 12px; box-shadow:var(--shadow); overflow:hidden}
+.card::before{content:''; position:absolute; left:0; right:0; top:0; height:6px;
+  background:var(--track); opacity:.9}
+.card.open{cursor:pointer; transition:border-color .14s, transform .14s}
+.card.open:hover{border-color:var(--ink-3); transform:translateY(-2px)}
+.card.st-line::after{content:''; position:absolute; left:0; top:6px; bottom:0; width:3px; background:var(--st)}
+
+.ctop{display:flex; justify-content:space-between; gap:12px; align-items:flex-start}
+.cid{display:flex; gap:11px; min-width:0}
+.thumb{width:52px; height:52px; border-radius:4px; object-fit:cover; flex:none;
+  border:1px solid var(--line-2); background:var(--surface-2)}
+.thumb.ph{display:grid; place-items:center; color:var(--ink-3); font-size:19px}
+.maker{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); font-family:var(--f-display)}
+.model{font-family:var(--f-display); font-size:20px; font-weight:400; line-height:1.25; margin-top:1px; letter-spacing:.01em}
+.meta{font-size:11.5px; color:var(--ink-3); margin-top:3px}
+.ages{font-size:11.5px; color:var(--ink-2); margin-top:3px}
+.ages b{font-family:var(--f-num); font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; font-size:12.5px}
+
 .nums{text-align:right; flex:none}
-.nums .big{font-family:var(--f-mono); font-size:27px; font-weight:500; line-height:1; font-variant-numeric:tabular-nums}
-.nums .sub{font-family:var(--f-mono); font-size:14px; font-weight:500; line-height:1.2; margin-top:5px; font-variant-numeric:tabular-nums}
-.nums .lb{font-size:10px; letter-spacing:.08em; color:var(--ink-3)}
-.t-act{color:var(--act)}
-.t-cal{color:var(--cal)}
-.bars{margin-top:12px; display:flex; flex-direction:column; gap:3px}
+.nums .big{font-family:var(--f-num); font-size:28px; font-weight:500; line-height:1; font-variant-numeric:tabular-nums}
+.nums .sml{font-family:var(--f-num); font-size:15px; font-weight:500; line-height:1.2; margin-top:5px; font-variant-numeric:tabular-nums}
+.nums .lb{font-size:9.5px; letter-spacing:.05em; color:var(--ink-3)}
+
+.bars{margin-top:11px; display:flex; flex-direction:column; gap:3px}
 .bar{height:4px; border-radius:99px; background:var(--surface-2); overflow:hidden; border:1px solid var(--line)}
 .bar i{display:block; height:100%}
-.bar.b-cal i{background:var(--cal)}
-.bar.b-act i{background:var(--act)}
-.card-foot{display:flex; justify-content:space-between; gap:10px; margin-top:9px; font-size:12px; color:var(--ink-2); flex-wrap:wrap; align-items:center}
-.chip{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:500;
-  padding:2px 8px; border-radius:99px; background:var(--st-soft); color:var(--st);
-  border:1px solid color-mix(in srgb, var(--st) 35%, transparent)}
-.chip::before{content:''; width:5px; height:5px; border-radius:99px; background:currentColor}
-.tag{display:inline-block; font-size:10.5px; padding:1px 7px; border-radius:99px;
-  border:1px solid var(--line-2); color:var(--ink-3); background:var(--surface-2)}
-.s-ok{--st:var(--ok); --st-soft:var(--ok-soft)}
-.s-soon{--st:var(--soon); --st-soft:var(--soon-soft)}
-.s-over{--st:var(--over); --st-soft:var(--over-soft)}
-.s-none{--st:var(--ink-3); --st-soft:var(--surface-2)}
-.s-q{--st:var(--cal); --st-soft:var(--cal-soft)}
+
+.quick{display:flex; gap:7px; margin-top:11px; flex-wrap:wrap; align-items:center}
+.qb{font-size:12px; font-weight:500; padding:6px 12px; border-radius:4px;
+  border:1px solid var(--acc); background:transparent; color:var(--acc)}
+.qb:hover{background:var(--acc-soft)}
+.qb.on{background:var(--acc); border-color:var(--acc); color:var(--on-acc)}
+.quick .hint{font-size:11px; color:var(--ink-3); margin-left:auto}
+
+.cfoot{display:flex; justify-content:space-between; gap:10px; margin-top:10px;
+  font-size:11.5px; color:var(--ink-2); flex-wrap:wrap; align-items:center}
+.pill{display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:500;
+  padding:2px 9px; border-radius:99px; background:var(--st-soft); color:var(--st); border:1px solid var(--st-line)}
+.pill::before{content:''; width:5px; height:5px; border-radius:99px; background:currentColor}
+.tag{display:inline-block; font-size:10px; padding:1px 7px; border-radius:99px;
+  border:1px solid var(--line-2); color:var(--ink-3)}
+.s-ok{--st:var(--ok); --st-soft:var(--ok-soft); --st-line:var(--ok-line)}
+.s-soon{--st:var(--warn); --st-soft:var(--warn-soft); --st-line:var(--warn-line)}
+.s-over{--st:var(--over); --st-soft:var(--over-soft); --st-line:var(--over-line)}
+.s-svc{--st:var(--warn); --st-soft:var(--warn-soft); --st-line:var(--warn-line)}
+.s-q{--st:var(--cal); --st-soft:var(--cal-soft); --st-line:var(--cal-line)}
+.s-none{--st:var(--ink-3); --st-soft:var(--surface-2); --st-line:var(--line-2)}
+
+/* service block */
+.svc{border:1px solid var(--warn-line); background:var(--warn-soft);
+  border-radius:4px; padding:10px 12px; margin-top:11px}
+.svc .r1{display:flex; justify-content:space-between; gap:10px; align-items:baseline; flex-wrap:wrap}
+.svc .st{font-size:12.5px; font-weight:600; color:var(--warn)}
+.svc .cd{font-family:var(--f-num); font-size:19px; font-weight:500; color:var(--warn); font-variant-numeric:tabular-nums}
+.svc .cd small{font-size:10px; font-family:var(--f-body); font-weight:400}
+.svc .r2{font-size:11.5px; color:var(--ink-2); margin-top:5px; display:flex; gap:12px; flex-wrap:wrap}
+.svc .r2 span{white-space:nowrap}
+.svc .r2 a{color:var(--cal); text-decoration:none}
+
+/* ---------- sort mode ---------- */
+.sortlist{display:flex; flex-direction:column; gap:7px}
+.sortrow{display:flex; align-items:center; gap:11px; background:var(--surface);
+  border:1px solid var(--line-2); border-radius:var(--r); padding:9px 12px; box-shadow:var(--shadow)}
+.sortrow.dragging{opacity:.55; border-style:dashed; box-shadow:none}
+.handle{width:34px; height:38px; flex:none; display:grid; place-items:center; cursor:grab;
+  touch-action:none; color:var(--ink-3); border:1px solid var(--line-2); border-radius:4px; background:var(--surface-2)}
+.handle:active{cursor:grabbing}
+.handle svg{display:block}
+.sortrow .sid{min-width:0; flex:1}
+.sortrow .sm{font-family:var(--f-display); font-size:16px; line-height:1.2}
+.sortrow .sk{font-size:10.5px; letter-spacing:.14em; color:var(--ink-3); text-transform:uppercase}
+.updown{display:flex; flex-direction:column; gap:2px; flex:none}
+.updown button{width:30px; height:19px; padding:0; font-size:11px; line-height:1;
+  border:1px solid var(--line-2); background:var(--surface-2); border-radius:3px; color:var(--ink-2)}
+.updown button:disabled{opacity:.3}
 
 /* ---------- empty ---------- */
-.empty{border:1px dashed var(--line-2); border-radius:var(--radius); padding:44px 24px; text-align:center; background:var(--surface)}
-.empty h2{font-size:20px; margin-bottom:8px}
-.empty p{color:var(--ink-2); max-width:46ch; margin:0 auto 20px; font-size:14px}
+.empty{border:1px dashed var(--line-2); border-radius:var(--r); padding:40px 22px; text-align:center; background:var(--surface)}
+.empty h2{font-family:var(--f-display); font-size:19px; font-weight:400; margin-bottom:8px}
+.empty p{color:var(--ink-2); max-width:46ch; margin:0 auto 18px; font-size:13.5px}
 .empty .acts{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
 
 /* ---------- detail ---------- */
-.back{display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-2); background:none; border:0; padding:14px 0; margin:0}
-.back:hover{color:var(--accent-2)}
-.hero{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
-  box-shadow:var(--shadow); padding:22px; display:flex; gap:24px; align-items:center; flex-wrap:wrap}
-.hero .info{flex:1; min-width:230px}
-.hero h2{font-size:25px; line-height:1.3}
-.hero .idrow{display:flex; gap:14px; align-items:center}
-.hero .idrow img{width:66px; height:66px; border-radius:9px; object-fit:cover; border:1px solid var(--line); flex:none}
-.ringwrap{position:relative; width:132px; height:132px; flex:none}
-.ringwrap .mid{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center}
-.ringwrap .mid b{font-family:var(--f-mono); font-size:23px; font-weight:500; line-height:1; color:var(--act); font-variant-numeric:tabular-nums}
-.ringwrap .mid u{font-family:var(--f-mono); font-size:13px; font-weight:500; text-decoration:none; color:var(--cal); font-variant-numeric:tabular-nums; margin-top:3px}
-.ringwrap .mid span{font-size:9.5px; color:var(--ink-3); letter-spacing:.05em}
+.back{display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-2);
+  background:none; border:0; padding:14px 0}
+.back:hover{color:var(--ink)}
+.hero{position:relative; background:var(--surface); border:1px solid var(--line-2); border-radius:var(--r);
+  box-shadow:var(--shadow); padding:22px 20px 20px; display:flex; gap:22px; align-items:center; flex-wrap:wrap; overflow:hidden}
+.hero::before{content:''; position:absolute; left:0; right:0; top:0; height:6px; background:var(--track); opacity:.9}
+.hero .info{flex:1; min-width:225px}
+.hero h2{font-family:var(--f-display); font-size:26px; font-weight:400; line-height:1.2; letter-spacing:.01em}
+.hero .idrow{display:flex; gap:13px; align-items:center}
+.hero .idrow img{width:64px; height:64px; border-radius:4px; object-fit:cover; border:1px solid var(--line-2); flex:none}
+.ringwrap{position:relative; width:130px; height:130px; flex:none}
+.ringwrap .mid{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center}
+.ringwrap .mid b{font-family:var(--f-num); font-size:26px; font-weight:500; line-height:1; color:var(--act); font-variant-numeric:tabular-nums}
+.ringwrap .mid span{font-size:9.5px; color:var(--ink-3); margin-top:3px; letter-spacing:.04em}
+.qbox{flex:none; text-align:center; padding:14px 22px; border:1px solid var(--line-2);
+  border-left:3px solid var(--cal); border-radius:4px; background:var(--surface-2)}
+.qbox .n{font-family:var(--f-num); font-size:34px; font-weight:500; line-height:1; color:var(--cal); font-variant-numeric:tabular-nums}
+.qbox .k{font-size:10px; letter-spacing:.14em; color:var(--ink-3); margin-top:5px}
 
 .dual{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px}
-.dual > div{border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--surface-2); border-left-width:3px}
+.dual > div{border:1px solid var(--line); border-radius:4px; padding:10px 12px; background:var(--surface-2); border-left-width:3px}
 .dual .d-cal{border-left-color:var(--cal)}
 .dual .d-act{border-left-color:var(--act)}
-.dual .k{font-size:10.5px; letter-spacing:.1em; color:var(--ink-3); text-transform:uppercase}
-.dual .date{font-family:var(--f-mono); font-size:15px; font-weight:500; margin-top:3px; font-variant-numeric:tabular-nums}
-.dual .rem{font-family:var(--f-mono); font-size:20px; font-weight:500; line-height:1.2; font-variant-numeric:tabular-nums}
+.dual .k{font-size:9.5px; letter-spacing:.14em; color:var(--ink-3); text-transform:uppercase; font-family:var(--f-display)}
+.dual .rem{font-family:var(--f-num); font-size:22px; font-weight:500; line-height:1.15; font-variant-numeric:tabular-nums}
 .dual .rem small{font-size:11px; font-family:var(--f-body); font-weight:400; color:var(--ink-3)}
-.dual .prog{font-size:11px; color:var(--ink-3); font-family:var(--f-mono); margin-top:3px}
+.dual .date{font-family:var(--f-mono); font-size:14px; font-weight:500; margin-top:2px; font-variant-numeric:tabular-nums}
+.dual .prog{font-size:10.5px; color:var(--ink-3); font-family:var(--f-mono); margin-top:3px}
 @media(max-width:520px){ .dual{grid-template-columns:1fr} }
 .hero .acts{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
 
-.qbox{flex:none; text-align:center; padding:14px 20px; border:1px solid var(--line);
-  border-left:3px solid var(--cal); border-radius:9px; background:var(--surface-2)}
-.qbox .n{font-family:var(--f-mono); font-size:32px; font-weight:500; line-height:1; color:var(--cal); font-variant-numeric:tabular-nums}
-.qbox .k{font-size:10.5px; letter-spacing:.1em; color:var(--ink-3); margin-top:5px}
-
-.tabs{display:flex; gap:2px; margin:26px 0 0; border-bottom:1px solid var(--line); overflow-x:auto}
+.tabs{display:flex; gap:2px; margin:24px 0 0; border-bottom:1px solid var(--line-2); overflow-x:auto}
 .tabs button{background:none; border:0; border-bottom:2px solid transparent; margin-bottom:-1px;
   padding:9px 14px; font-size:13.5px; color:var(--ink-3); white-space:nowrap; font-weight:500}
-.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent-2)}
-.panel{background:var(--surface); border:1px solid var(--line); border-top:0;
-  border-radius:0 0 var(--radius) var(--radius); padding:20px; box-shadow:var(--shadow)}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--acc)}
+.panel{background:var(--surface); border:1px solid var(--line-2); border-top:0;
+  border-radius:0 0 var(--r) var(--r); padding:20px; box-shadow:var(--shadow)}
 
-.photo-full{width:100%; max-height:280px; object-fit:contain; border-radius:9px;
+.photo-full{width:100%; max-height:280px; object-fit:contain; border-radius:4px;
   background:var(--surface-2); border:1px solid var(--line); margin-bottom:16px}
-.spec{display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:8px; overflow:hidden}
-.spec div{background:var(--surface); padding:11px 14px}
-.spec .k{font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
-.spec .v{margin-top:2px; font-size:14.5px}
+.spec{display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line);
+  border:1px solid var(--line); border-radius:4px; overflow:hidden}
+.spec > div{background:var(--surface); padding:10px 13px}
+.spec .k{font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); font-family:var(--f-display)}
+.spec .v{margin-top:2px; font-size:14px}
 .spec .v.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
 @media(max-width:560px){ .spec{grid-template-columns:1fr} }
 
 .note{font-size:12.5px; color:var(--ink-2); background:var(--surface-2);
-  border:1px solid var(--line); border-left:3px solid var(--accent-2);
-  border-radius:0 8px 8px 0; padding:11px 14px; margin-top:18px}
+  border:1px solid var(--line); border-left:3px solid var(--ink-3);
+  border-radius:0 4px 4px 0; padding:11px 14px; margin-top:16px}
 .note b{color:var(--ink); font-weight:500}
-.note.cap{border-left-color:var(--soon)}
+.note.warn{border-left-color:var(--warn)}
 .note.blue{border-left-color:var(--cal)}
 
 /* ---------- calendar ---------- */
 .calbar{display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap}
-.calbar .mo{font-family:var(--f-display); font-size:18px; min-width:9ch}
-.calbar .nav{display:flex; gap:4px; margin-left:auto}
-.calbar .nav button{width:32px; height:32px; display:grid; place-items:center; padding:0}
-.bulk{border:1px solid var(--line); background:var(--surface-2); border-radius:9px;
+.calbar .mo{font-family:var(--f-display); font-size:19px; font-weight:400; min-width:9ch; letter-spacing:.04em}
+.calbar .nav2{display:flex; gap:4px; margin-left:auto}
+.calbar .nav2 button{width:32px; height:32px; display:grid; place-items:center; padding:0}
+.bulk{border:1px solid var(--line); background:var(--surface-2); border-radius:4px;
   padding:11px 12px; margin-bottom:14px; display:flex; flex-direction:column; gap:9px}
 .bulk .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-.bulk .lbl{font-size:10.5px; letter-spacing:.1em; color:var(--ink-3); text-transform:uppercase; flex:none}
+.bulk .lbl{font-size:9.5px; letter-spacing:.16em; color:var(--ink-3); text-transform:uppercase; flex:none; font-family:var(--f-display)}
 .dowpick{display:flex; gap:4px; flex-wrap:wrap}
-.dowpick button{width:34px; height:34px; padding:0; border-radius:8px; border:1px solid var(--line-2);
+.dowpick button{width:34px; height:34px; padding:0; border-radius:4px; border:1px solid var(--line-2);
   background:var(--surface); font-size:13px; display:grid; place-items:center}
-.dowpick button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600}
-:root[data-theme="dark"] .dowpick button[aria-pressed="true"], :root:not([data-theme="light"]) .dowpick button[aria-pressed="true"]{color:#17130A}
-@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .dowpick button[aria-pressed="true"]{color:#fff}}
+.dowpick button[aria-pressed="true"]{background:var(--acc); border-color:var(--acc); color:var(--on-acc); font-weight:600}
 .dow{display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:5px}
-.dow span{text-align:center; font-size:10.5px; color:var(--ink-3); letter-spacing:.08em}
+.dow span{text-align:center; font-size:10px; color:var(--ink-3); letter-spacing:.1em; font-family:var(--f-display)}
 .dow span:first-child{color:var(--over)}
 .days{display:grid; grid-template-columns:repeat(7,1fr); gap:5px}
-.day{aspect-ratio:1/1; min-height:40px; border:1px solid var(--line); border-radius:7px;
-  background:var(--surface-2); color:var(--ink-2); font-family:var(--f-mono); font-size:13.5px;
-  display:grid; place-items:center; padding:0; transition:background .12s, border-color .12s}
-.day:hover:not(:disabled){border-color:var(--accent-2)}
-.day.on{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600}
-:root[data-theme="dark"] .day.on, :root:not([data-theme="light"]) .day.on{color:#17130A}
-@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .day.on{color:#fff}}
-.day.run{background:var(--accent-soft); border-color:color-mix(in srgb, var(--accent-2) 45%, transparent); color:var(--accent)}
-.day.today{box-shadow:inset 0 0 0 2px var(--accent-2)}
-.day:disabled{opacity:.35; cursor:default; background:transparent}
+.day{aspect-ratio:1/1; min-height:40px; border:1px solid var(--line); border-radius:4px;
+  background:var(--surface-2); color:var(--ink-2); font-family:var(--f-num); font-size:14px; font-weight:400;
+  display:grid; place-items:center; padding:0}
+.day:hover:not(:disabled){border-color:var(--ink-3)}
+.day.on{background:var(--acc); border-color:var(--acc); color:var(--on-acc); font-weight:600}
+.day.run{background:var(--acc-soft); border-color:var(--line-2); color:var(--ink-2)}
+.day.today{box-shadow:inset 0 0 0 2px var(--cal)}
+.day:disabled{opacity:.3; cursor:default; background:transparent}
 .day.blank{border:0; background:none; cursor:default}
-.legend{display:flex; gap:16px; flex-wrap:wrap; margin-top:12px; font-size:12px; color:var(--ink-2)}
+.legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:12px; font-size:11.5px; color:var(--ink-2)}
 .legend span{display:inline-flex; align-items:center; gap:6px}
-.legend i{width:14px; height:14px; border-radius:4px; display:inline-block; border:1px solid var(--line)}
-.legend i.w{background:var(--accent); border-color:var(--accent)}
-.legend i.r{background:var(--accent-soft); border-color:color-mix(in srgb, var(--accent-2) 45%, transparent)}
+.legend i{width:14px; height:14px; border-radius:3px; display:inline-block; border:1px solid var(--line-2)}
+.legend i.w{background:var(--acc); border-color:var(--acc)}
+.legend i.r{background:var(--acc-soft)}
 .legend i.n{background:var(--surface-2)}
 .mstats{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line);
-  border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-top:16px}
-.mstats div{background:var(--surface); padding:10px 13px; text-align:center}
-.mstats .k{font-size:10.5px; letter-spacing:.1em; color:var(--ink-3)}
-.mstats .v{font-family:var(--f-mono); font-size:19px; font-weight:500; margin-top:2px; font-variant-numeric:tabular-nums}
+  border:1px solid var(--line); border-radius:4px; overflow:hidden; margin-top:16px}
+.mstats > div{background:var(--surface); padding:10px 8px; text-align:center}
+.mstats .k{font-size:9.5px; letter-spacing:.12em; color:var(--ink-3); font-family:var(--f-display)}
+.mstats .v{font-family:var(--f-num); font-size:20px; font-weight:500; margin-top:2px; font-variant-numeric:tabular-nums}
 
 /* ---------- history / table ---------- */
-.hist{display:flex; flex-direction:column; gap:10px}
+.hist{display:flex; flex-direction:column; gap:9px}
 .hrow{display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
-  border:1px solid var(--line); border-radius:8px; padding:12px 14px; background:var(--surface-2); border-left-width:3px}
-.hrow.oh{border-left-color:var(--accent-2)}
+  border:1px solid var(--line); border-radius:4px; padding:11px 13px; background:var(--surface-2); border-left-width:3px}
+.hrow.oh{border-left-color:var(--acc)}
 .hrow.rp{border-left-color:var(--line-2)}
-.hrow .d{font-family:var(--f-mono); font-size:13.5px; color:var(--ink-3); font-weight:500}
-.hrow .c{font-size:14.5px; margin-top:2px}
-.hrow .s{font-size:12.5px; color:var(--ink-3); margin-top:2px}
-.hrow .amt{font-family:var(--f-mono); font-size:15px; font-variant-numeric:tabular-nums; white-space:nowrap; text-align:right}
-.kind{display:inline-block; font-size:10.5px; padding:1px 7px; border-radius:99px; margin-left:6px; vertical-align:1px}
-.kind.oh{background:var(--accent-soft); color:var(--accent); border:1px solid color-mix(in srgb, var(--accent-2) 40%, transparent)}
+.hrow .d{font-family:var(--f-mono); font-size:13px; color:var(--ink-3); font-weight:500}
+.hrow .c{font-size:14px; margin-top:2px}
+.hrow .s{font-size:12px; color:var(--ink-3); margin-top:2px}
+.hrow .amt{font-family:var(--f-mono); font-size:14.5px; font-variant-numeric:tabular-nums; white-space:nowrap; text-align:right}
+.kind{display:inline-block; font-size:10px; padding:1px 7px; border-radius:99px; margin-left:6px; vertical-align:1px}
+.kind.oh{background:var(--acc-soft); color:var(--ink); border:1px solid var(--line-2)}
 .kind.rp{background:var(--surface); color:var(--ink-3); border:1px solid var(--line-2)}
-.tblwrap{overflow-x:auto; border:1px solid var(--line); border-radius:8px; max-height:460px}
-table{border-collapse:collapse; width:100%; font-size:13px; min-width:520px}
+.tblwrap{overflow-x:auto; border:1px solid var(--line); border-radius:4px; max-height:440px}
+table{border-collapse:collapse; width:100%; font-size:12.5px; min-width:520px}
 th,td{padding:8px 12px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
-th{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3);
-  font-weight:500; background:var(--surface-2); position:sticky; top:0; z-index:1}
+th{font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
+  font-weight:500; background:var(--surface-2); position:sticky; top:0; z-index:1; font-family:var(--f-display)}
 tbody td{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
 tbody tr:last-child td{border-bottom:0}
 tr.part td{color:var(--ink-3)}
 tfoot td{font-weight:600; background:var(--surface-2); font-family:var(--f-mono); position:sticky; bottom:0}
 
+/* ---------- shops & wishes ---------- */
+.shoprow{display:flex; gap:13px; justify-content:space-between; align-items:flex-start;
+  background:var(--surface); border:1px solid var(--line-2); border-radius:var(--r);
+  padding:13px 14px; box-shadow:var(--shadow)}
+.shoprow .nm{font-family:var(--f-display); font-size:17px; font-weight:400; line-height:1.3}
+.shoprow .dt{font-size:12px; color:var(--ink-2); margin-top:3px; line-height:1.7}
+.shoprow .dt a{color:var(--cal); text-decoration:none; word-break:break-all}
+.shoprow .dt .lbx{color:var(--ink-3); font-size:10px; letter-spacing:.1em; margin-right:5px; font-family:var(--f-display); text-transform:uppercase}
+.shoprow .acts{display:flex; flex-direction:column; gap:6px; flex:none}
+.wprice{display:flex; gap:14px; flex-wrap:wrap; margin-top:8px}
+.wprice > div .k{font-size:9.5px; letter-spacing:.14em; color:var(--ink-3); text-transform:uppercase; font-family:var(--f-display)}
+.wprice > div .v{font-family:var(--f-mono); font-size:15px; font-weight:500; font-variant-numeric:tabular-nums}
+.prio{display:inline-block; font-size:10px; padding:1px 8px; border-radius:99px; font-weight:600}
+.prio.p1{background:var(--act-soft); color:var(--act); border:1px solid var(--act-line)}
+.prio.p2{background:var(--warn-soft); color:var(--warn); border:1px solid var(--warn-line)}
+.prio.p3{background:var(--surface-2); color:var(--ink-3); border:1px solid var(--line-2)}
+.shopchips{display:flex; gap:6px; flex-wrap:wrap; margin-top:9px}
+.shopchips .sc{font-size:11px; padding:3px 9px; border-radius:99px; border:1px solid var(--line-2);
+  background:var(--surface-2); color:var(--ink-2)}
+
+/* patrol sheet */
+.patrol{display:flex; flex-direction:column; gap:8px; margin-top:4px}
+.pstep{display:flex; align-items:center; gap:11px; border:1px solid var(--line-2);
+  border-radius:4px; padding:11px 13px; background:var(--surface-2); text-decoration:none; color:var(--ink)}
+.pstep.next{border-color:var(--acc); background:var(--acc); color:var(--on-acc)}
+.pstep.done{opacity:.6}
+.pstep .no{font-family:var(--f-num); font-size:15px; font-weight:600; width:22px; flex:none; text-align:center}
+.pstep .nm2{flex:1; min-width:0; font-size:14px; font-weight:500}
+.pstep .nm2 small{display:block; font-size:10.5px; font-weight:400; opacity:.7; word-break:break-all}
+.pstep .go{font-size:11px; flex:none}
+
 /* ---------- modal / forms ---------- */
-.veil{position:fixed; inset:0; z-index:60; background:rgba(10,14,18,.55);
+.veil{position:fixed; inset:0; z-index:60; background:rgba(12,14,17,.6);
   display:flex; align-items:flex-start; justify-content:center; overflow-y:auto;
   padding:24px 16px; backdrop-filter:blur(2px)}
-.modal{background:var(--surface); border:1px solid var(--line); border-radius:12px;
-  box-shadow:0 24px 60px -20px rgba(0,0,0,.5); width:100%; max-width:540px; padding:22px; margin:auto}
-.modal h3{font-size:19px; margin-bottom:4px}
-.modal .sub{font-size:12.5px; color:var(--ink-3); margin-bottom:18px}
+.modal{background:var(--surface); border:1px solid var(--line-2); border-radius:var(--r);
+  box-shadow:0 24px 60px -20px rgba(0,0,0,.55); width:100%; max-width:540px; padding:22px; margin:auto;
+  position:relative; overflow:hidden}
+.modal::before{content:''; position:absolute; left:0; right:0; top:0; height:6px; background:var(--track); opacity:.9}
+.modal h3{font-family:var(--f-display); font-size:20px; font-weight:400; margin-top:6px; letter-spacing:.02em}
+.modal .sub{font-size:12.5px; color:var(--ink-3); margin-bottom:18px; margin-top:3px}
 .fields{display:grid; grid-template-columns:1fr 1fr; gap:13px}
 .fields .full{grid-column:1/-1}
 @media(max-width:520px){ .fields{grid-template-columns:1fr} }
 label{display:block}
-label .lb, .lb{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin-bottom:5px; display:block}
+label .lb, .lb{font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);
+  margin-bottom:5px; display:block; font-family:var(--f-display)}
 input,select,textarea{width:100%; font:inherit; font-size:14px; color:var(--ink);
-  background:var(--surface-2); border:1px solid var(--line-2); border-radius:7px; padding:8px 10px}
+  background:var(--surface-2); border:1px solid var(--line-2); border-radius:4px; padding:8px 10px}
+textarea{resize:vertical; min-height:62px}
 input[type="number"],input[type="date"]{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
-input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-2); outline-offset:0; border-color:var(--accent-2)}
-.seg{display:flex; border:1px solid var(--line-2); border-radius:7px; overflow:hidden}
-.seg button{flex:1; background:var(--surface-2); border:0; padding:8px; font-size:13.5px; color:var(--ink-2)}
-.seg button[aria-pressed="true"]{background:var(--accent); color:#fff; font-weight:500}
-:root[data-theme="dark"] .seg button[aria-pressed="true"], :root:not([data-theme="light"]) .seg button[aria-pressed="true"]{color:#17130A}
-@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .seg button[aria-pressed="true"]{color:#fff}}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--cal); outline-offset:0; border-color:var(--cal)}
+.seg{display:flex; border:1px solid var(--line-2); border-radius:4px; overflow:hidden}
+.seg button{flex:1; background:var(--surface-2); border:0; padding:8px 4px; font-size:13px; color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--acc); color:var(--on-acc); font-weight:500}
 .check{display:flex; align-items:flex-start; gap:10px; border:1px solid var(--line-2);
-  border-radius:7px; padding:10px 12px; background:var(--surface-2); cursor:pointer}
-.check input{width:18px; height:18px; accent-color:var(--accent); flex:none; margin-top:2px}
+  border-radius:4px; padding:10px 12px; background:var(--surface-2); cursor:pointer}
+.check input{width:18px; height:18px; accent-color:var(--acc); flex:none; margin-top:2px}
 .check .t{font-size:13.5px; line-height:1.5}
 .check .t small{display:block; color:var(--ink-3); font-size:11.5px}
 .photo-pick{display:flex; gap:12px; align-items:center}
-.photo-pick .pv{width:76px; height:76px; border-radius:9px; object-fit:cover; border:1px solid var(--line-2); background:var(--surface-2); flex:none}
-.photo-pick .pv.ph{display:grid; place-items:center; color:var(--ink-3); font-size:24px}
+.photo-pick .pv{width:74px; height:74px; border-radius:4px; object-fit:cover; border:1px solid var(--line-2); background:var(--surface-2); flex:none}
+.photo-pick .pv.ph{display:grid; place-items:center; color:var(--ink-3); font-size:23px}
 .photo-pick .acts{display:flex; gap:8px; flex-wrap:wrap}
+.pickgrid{display:flex; flex-direction:column; gap:6px; max-height:190px; overflow-y:auto;
+  border:1px solid var(--line-2); border-radius:4px; padding:7px; background:var(--surface-2)}
+.pickgrid label{display:flex; align-items:center; gap:9px; font-size:13.5px; padding:4px 5px; cursor:pointer}
+.pickgrid input{width:17px; height:17px; accent-color:var(--acc); flex:none}
+.pickgrid .none2{font-size:12px; color:var(--ink-3); padding:6px}
 .modal-acts{display:flex; gap:9px; justify-content:flex-end; margin-top:22px; flex-wrap:wrap}
 .modal-acts .left{margin-right:auto}
 .err{color:var(--over); font-size:12.5px; margin-top:12px; min-height:1em}
 
-/* ---------- combobox ---------- */
+/* combobox */
 .combo{position:relative}
 .combo input{padding-right:34px}
 .combo-tog{position:absolute; right:1px; top:1px; bottom:1px; width:30px; background:none; border:0;
-  color:var(--ink-3); font-size:11px; display:grid; place-items:center; border-radius:0 7px 7px 0}
-.combo-tog:hover{color:var(--accent-2)}
+  color:var(--ink-3); font-size:11px; display:grid; place-items:center; border-radius:0 4px 4px 0}
+.combo-tog:hover{color:var(--ink)}
 .combo-list{position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
-  background:var(--surface); border:1px solid var(--line-2); border-radius:8px;
-  box-shadow:0 16px 36px -14px rgba(0,0,0,.4); max-height:264px; overflow-y:auto; padding:4px}
-.combo-list .g{font-size:10px; letter-spacing:.14em; color:var(--ink-3); padding:8px 10px 4px; position:sticky; top:-4px; background:var(--surface)}
-.combo-list button{display:block; width:100%; text-align:left; background:none; border:0; padding:6px 10px; border-radius:6px; font-size:13.5px; color:var(--ink)}
-.combo-list button:hover{background:var(--accent-soft); color:var(--accent)}
+  background:var(--surface); border:1px solid var(--line-2); border-radius:4px;
+  box-shadow:0 16px 36px -14px rgba(0,0,0,.45); max-height:258px; overflow-y:auto; padding:4px}
+.combo-list .g{font-size:9.5px; letter-spacing:.16em; color:var(--ink-3); padding:8px 10px 4px;
+  position:sticky; top:-4px; background:var(--surface); font-family:var(--f-display); text-transform:uppercase}
+.combo-list button{display:block; width:100%; text-align:left; background:none; border:0;
+  padding:7px 10px; border-radius:3px; font-size:13.5px; color:var(--ink)}
+.combo-list button:hover{background:var(--acc-soft)}
 .combo-list .none{padding:10px; font-size:12.5px; color:var(--ink-3)}
 
 .dsec{border-top:1px solid var(--line); margin-top:18px; padding-top:16px}
@@ -359,47 +457,50 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-2); outli
 .dsec p{font-size:12.5px; color:var(--ink-2); margin:0}
 
 .toast{position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%);
-  background:var(--ink); color:var(--bg); padding:9px 16px; border-radius:99px;
+  background:var(--ink); color:var(--bg); padding:9px 16px; border-radius:4px;
   font-size:13px; z-index:90; box-shadow:var(--shadow); max-width:calc(100% - 32px); text-align:center}
-footer{margin-top:34px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-3)}
+footer{margin-top:32px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-3)}
 
 /* ---------- phone ---------- */
 @media(max-width:560px){
   body{font-size:14.5px}
-  .mast-in{display:grid; grid-template-columns:1fr auto; gap:8px 10px; align-items:center; padding:10px 16px}
-  .brand{grid-column:1; grid-row:1; margin-right:0}
+  .mast-in{padding:10px 16px 0}
   .brand h1{font-size:17px}
-  .brand .rule, .brand .eyebrow{display:none}
-  #btnAdd{grid-column:2; grid-row:1}
-  #modeBadge{grid-column:1; grid-row:2; justify-self:start}
-  #btnSettings{grid-column:2; grid-row:2; justify-self:end}
+  .brand .eyebrow{display:none}
+  .mrow2{gap:6px; margin-top:9px; padding-bottom:9px; overflow-x:auto}
+  .nav button{padding:6px 11px; font-size:12.5px}
+  .badge{display:none}
+  .ln{display:none}
 
-  .strip{margin:16px 0 20px}
-  .strip div{padding:11px 13px}
-  .strip .v{font-size:19px}
+  .strip > div{padding:10px 12px}
+  .strip .v{font-size:20px}
+  .strip .v.money{font-size:15px}
 
-  .card{padding:14px 14px 12px 17px}
-  .card .model{font-size:16.5px}
+  .card{padding:16px 13px 11px}
+  .model{font-size:18px}
   .thumb{width:46px; height:46px}
-  .nums .big{font-size:24px}
+  .nums .big{font-size:25px}
 
-  .hero{flex-direction:column; align-items:stretch; gap:16px; padding:18px}
+  .hero{flex-direction:column; align-items:stretch; gap:15px; padding:20px 16px 18px}
   .hero .ringwrap{align-self:center; width:116px; height:116px}
   .hero .ringwrap svg{width:100%; height:100%}
-  .hero .ringwrap .mid b{font-size:22px}
+  .hero .ringwrap .mid b{font-size:23px}
   .hero .qbox{align-self:center}
-  .hero h2{font-size:21px}
-  .hero .acts{margin-top:12px}
+  .hero h2{font-size:22px}
   .hero .acts .btn{flex:1 1 auto}
 
   .tabs button{padding:9px 11px; font-size:13px}
-  .panel{padding:16px 14px}
+  .panel{padding:16px 13px}
   .days, .dow{gap:4px}
-  .day{min-height:42px; font-size:13px}
+  .day{min-height:42px; font-size:13.5px}
   .calbar .mo{font-size:17px; min-width:8ch}
-  .mstats div{padding:9px 6px}
-  .mstats .v{font-size:17px}
-  .legend{gap:10px; font-size:11.5px}
+  .mstats > div{padding:9px 5px}
+  .mstats .v{font-size:18px}
+  .legend{gap:9px; font-size:11px}
+
+  .shoprow{flex-direction:column}
+  .shoprow .acts{flex-direction:row; width:100%}
+  .shoprow .acts .btn{flex:1}
 
   .modal{padding:18px}
   .modal-acts{gap:8px}
@@ -408,23 +509,27 @@ footer{margin-top:34px; padding-top:16px; border-top:1px solid var(--line); font
   input, select, textarea{font-size:16px}
 }
 @media(max-width:400px){
-  .strip{grid-template-columns:1fr 1fr}
+  .strip.s4{grid-template-columns:1fr 1fr}
   .day{min-height:40px}
   .dowpick button{width:32px; height:32px}
 }
-@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+@media (prefers-reduced-motion: reduce){ *{transition:none !important} }
 </style>
 
 <header class="mast">
   <div class="mast-in">
-    <div class="brand">
-      <h1>時計メンテナンス台帳</h1>
-      <span class="rule"></span>
-      <span class="eyebrow">Overhaul Ledger</span>
+    <div class="mrow1">
+      <div class="brand">
+        <h1>時計メンテナンス台帳</h1>
+        <span class="eyebrow">Sector</span>
+      </div>
+      <button class="btn btn-ghost" id="btnSettings">設定</button>
+      <button class="btn btn-primary" id="btnAdd">追加</button>
     </div>
-    <span class="badge" id="modeBadge">読み込み中</span>
-    <button class="btn btn-ghost" id="btnSettings">設定</button>
-    <button class="btn btn-primary" id="btnAdd">時計を追加</button>
+    <div class="mrow2">
+      <div class="nav" id="nav"></div>
+      <span class="badge" id="modeBadge">読み込み中</span>
+    </div>
   </div>
 </header>
 
@@ -442,7 +547,7 @@ footer{margin-top:34px; padding-top:16px; border-top:1px solid var(--line); font
 (function(){
 "use strict";
 
-/* ============ makers ============ */
+/* ============ static data ============ */
 var MAKERS = [
   ['日本', ['GRAND SEIKO','SEIKO','CREDOR','CITIZEN','THE CITIZEN','CAMPANOLA','CASIO','G-SHOCK','ORIENT','ORIENT STAR','MINASE','KURONO TOKYO','NAOYA HIDA','KNOT','SPQR']],
   ['スイス', ['ROLEX','TUDOR','OMEGA','PATEK PHILIPPE','AUDEMARS PIGUET','VACHERON CONSTANTIN','JAEGER-LECOULTRE','IWC','BREGUET','BLANCPAIN','CARTIER','PANERAI','HUBLOT','ZENITH','TAG HEUER','BREITLING','LONGINES','ORIS','HAMILTON','TISSOT','RADO','MIDO','CERTINA','CHOPARD','PIAGET','ULYSSE NARDIN','GIRARD-PERREGAUX','BELL & ROSS','BAUME & MERCIER','MONTBLANC','FREDERIQUE CONSTANT','MAURICE LACROIX','RAYMOND WEIL','EDOX','BALL','DOXA','SQUALE','SWATCH','VICTORINOX','ALPINA','CORUM','FRANCK MULLER','H. MOSER & CIE','RICHARD MILLE','ROGER DUBUIS','PARMIGIANI FLEURIER','F.P. JOURNE','TITONI','ETERNA']],
@@ -450,6 +555,7 @@ var MAKERS = [
   ['その他', ['BREMONT','CHRISTOPHER WARD','FARER','SMITHS','MARATHON','TIMEX','BULOVA','SHINOLA','LUMINOX','MONDAINE','BRAUN','STURMANSKIE','VOSTOK','APPLE','GARMIN','SUUNTO','FOSSIL','SKAGEN','DANIEL WELLINGTON','NIXON']]
 ];
 var DOW = ['日','月','火','水','木','金','土'];
+var SVC_STATUS = ['見積もり待ち','承認・連絡待ち（保留）','作業中','完成待ち','受取・発送待ち'];
 
 /* ============ utilities ============ */
 var $ = function(s,r){ return (r||document).querySelector(s); };
@@ -466,20 +572,39 @@ function daysInMonth(y,m){ return new Date(y, m, 0).getDate(); }
 function mkey(y,m){ return y+'-'+pad(m); }
 function jpDate(s){ if(!s) return '—'; var d=parseYMD(s); return d.getFullYear()+'.'+pad(d.getMonth()+1)+'.'+pad(d.getDate()); }
 function yen(n){ if(n==null||n==='') return '—'; return '¥'+Number(n).toLocaleString('ja-JP'); }
-function uid(){ return 'w'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function uid(p){ return (p||'w')+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function serial(d){ return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())/86400000); }
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
-function yearsMonths(days){
+function ymText(days){
+  if(days < 0) days = 0;
   var y = Math.floor(days/365.25), m = Math.floor((days - y*365.25)/30.44);
-  return (y ? y + '年' : '') + m + 'か月';
+  if(m > 11) m = 11;
+  return {y:y, m:m};
+}
+function ymLabel(days){ var t = ymText(days); return (t.y ? t.y+'年' : '') + t.m + 'か月'; }
+/* only http(s); anything else is dropped so a typed value can never become a javascript: link */
+function safeUrl(u){
+  var s = String(u == null ? '' : u).trim();
+  if(!s) return '';
+  if(!/^https?:\/\//i.test(s)){
+    if(/^[a-z][a-z0-9+.\-]*:/i.test(s)) return '';
+    s = 'https://' + s;
+  }
+  try{ var x = new URL(s); return (x.protocol === 'http:' || x.protocol === 'https:') ? x.href : ''; }
+  catch(e){ return ''; }
+}
+function telHref(t){
+  var s = String(t == null ? '' : t).replace(/[^0-9+\-]/g, '');
+  return s ? 'tel:' + s : '';
 }
 
 /* ============ state ============ */
-var DEFAULT_CFG = { intervalYears:4, maxYears:8, carryDays:2 };
-var state = { watches:{}, usage:{}, photos:{}, config:Object.assign({},DEFAULT_CFG) };
-var view  = { name:'list', id:null, tab:'overview', showAll:false };
+var DEFAULT_CFG = { intervalYears:4, maxYears:8, carryDays:2, collectionSort:'due' };
+var state = { watches:{}, usage:{}, photos:{}, shops:{}, wishes:{}, config:Object.assign({},DEFAULT_CFG) };
+var view = { page:'collection', detail:null, tab:'overview', showAll:false, sortMode:false };
 var cal = null, dowSel = {};
-var formPhoto = null;
+var formPhoto = null, photoTarget = null;
+var patrol = null;   /* {wishId, done:{shopId:true}} */
 var DB = null, mode = 'local';
 var IS_HOSTED = !!(window.claude && window.claude.use);
 var LS = 'watch-ledger-v1';
@@ -493,11 +618,14 @@ function apply(o){
   state.watches = o.watches || {};
   state.usage   = o.usage   || {};
   state.photos  = o.photos  || {};
+  state.shops   = o.shops   || {};
+  state.wishes  = o.wishes  || {};
   state.config  = Object.assign({}, DEFAULT_CFG, o.config || {});
 }
 function snapshotData(){
-  return { app:'watch-ledger', version:3, savedAt:new Date().toISOString(),
-           watches:state.watches, usage:state.usage, photos:state.photos, config:state.config };
+  return { app:'watch-ledger', version:4, savedAt:new Date().toISOString(),
+    watches:state.watches, usage:state.usage, photos:state.photos,
+    shops:state.shops, wishes:state.wishes, config:state.config };
 }
 function saveLocal(){
   try{ localStorage.setItem(LS, JSON.stringify(snapshotData())); }
@@ -518,7 +646,7 @@ async function writeFile(){
     var w = await fileHandle.createWritable();
     await w.write(JSON.stringify(snapshotData(), null, 2));
     await w.close();
-  }catch(e){ filePerm = 'none'; renderBanner(); toast('データファイルに書き込めませんでした。設定から接続し直してください。'); }
+  }catch(e){ filePerm='none'; renderBanner(); toast('データファイルに書き込めませんでした。設定から接続し直してください。'); }
 }
 function idb(fn){
   return new Promise(function(res){
@@ -541,10 +669,8 @@ function idbSet(k,v){ return idb(function(db,res){
 async function linkFile(){
   if(!window.showSaveFilePicker){ toast('この環境ではファイル保存に対応していません。バックアップの書き出しをお使いください。'); return; }
   try{
-    var h = await window.showSaveFilePicker({
-      suggestedName: '時計メンテナンス台帳.json',
-      types:[{description:'台帳データ (JSON)', accept:{'application/json':['.json']}}]
-    });
+    var h = await window.showSaveFilePicker({ suggestedName:'時計メンテナンス台帳.json',
+      types:[{description:'台帳データ (JSON)', accept:{'application/json':['.json']}}] });
     fileHandle = h; filePerm = 'granted'; fileName = h.name;
     await idbSet('fileHandle', h);
     await writeFile();
@@ -579,9 +705,8 @@ async function unlinkFile(){
   fileHandle = null; filePerm = 'none'; fileName = '';
   await idbSet('fileHandle', null);
   renderBanner(); render();
-  toast('データファイルの接続を解除しました。データはこのブラウザに残っています。');
+  toast('データファイルの接続を解除しました。データはこの端末に残っています。');
 }
-
 function exportBackup(){
   var blob = new Blob([JSON.stringify(snapshotData(), null, 2)], {type:'application/json'});
   var url = URL.createObjectURL(blob);
@@ -600,14 +725,15 @@ $('#impFile').addEventListener('change', function(e){
       if(!o.watches) throw new Error('形式が違います');
       apply(o);
       if(mode === 'db') pushAllToDb(); else saveLocal();
-      view = {name:'list', tab:'overview'}; render();
-      toast('バックアップを読み込みました（' + Object.keys(state.watches).length + ' 本）');
+      view = {page:'collection', detail:null, tab:'overview', showAll:false, sortMode:false};
+      render();
+      toast('バックアップを読み込みました（時計 ' + Object.keys(state.watches).length + ' 本）');
     }catch(err){ toast('読み込めませんでした：' + (err.message || '不明なファイル')); }
   };
   rd.readAsText(f); e.target.value = '';
 });
 
-/* ---- photos: shrink before storing so one watch stays well inside the limits ---- */
+/* ---- photos ---- */
 var PHOTO_BUDGET = 170000;
 function loadPhoto(file, cb){
   var fr = new FileReader();
@@ -643,14 +769,14 @@ $('#photoFile').addEventListener('change', function(e){
     formPhoto = dataUrl;
     var pv = $('#photoPreview');
     if(pv){
-      pv.outerHTML = '<img id="photoPreview" class="pv" src="' + dataUrl + '" alt="登録した時計の写真">';
+      pv.outerHTML = '<img id="photoPreview" class="pv" src="' + dataUrl + '" alt="登録した写真">';
       var rm = $('#photoRemove'); if(rm) rm.hidden = false;
     }
     toast('画像を選びました。「保存」で登録されます。');
   });
 });
 
-/* one write at a time per document, coalescing bursts */
+/* ---- persistence ---- */
 var wq = {};
 function enqueue(path, fn){
   var st = wq[path] || (wq[path] = {busy:false, latest:null});
@@ -664,52 +790,69 @@ function enqueue(path, fn){
   })();
 }
 async function pushAllToDb(){
-  var ids = Object.keys(state.watches);
-  for(var i=0;i<ids.length;i++){
+  var i, ids = Object.keys(state.watches);
+  for(i=0;i<ids.length;i++){
     await DB.doc('watches/'+ids[i]).set(state.watches[ids[i]]);
-    if(state.usage[ids[i]])  await DB.doc('usage/'+ids[i]).set(state.usage[ids[i]]);
-    if(state.photos[ids[i]]) await DB.doc('photos/'+ids[i]).set(state.photos[ids[i]]);
+    if(state.usage[ids[i]]) await DB.doc('usage/'+ids[i]).set(state.usage[ids[i]]);
   }
+  ids = Object.keys(state.shops);
+  for(i=0;i<ids.length;i++) await DB.doc('shops/'+ids[i]).set(state.shops[ids[i]]);
+  ids = Object.keys(state.wishes);
+  for(i=0;i<ids.length;i++) await DB.doc('wishes/'+ids[i]).set(state.wishes[ids[i]]);
+  ids = Object.keys(state.photos);
+  for(i=0;i<ids.length;i++) await DB.doc('photos/'+ids[i]).set(state.photos[ids[i]]);
   await DB.doc('config/app').set(state.config);
 }
-function putWatch(id, w){
-  state.watches[id] = w; render();
-  if(mode==='db') enqueue('watches/'+id, function(){ return DB.doc('watches/'+id).set(w); });
+function put(coll, id, obj){
+  state[coll][id] = obj; render();
+  if(mode==='db') enqueue(coll+'/'+id, function(){ return DB.doc(coll+'/'+id).set(obj); });
   else saveLocal();
+}
+function del(coll, id){
+  delete state[coll][id];
+  if(mode==='db') enqueue(coll+'/'+id, function(){ return DB.doc(coll+'/'+id).delete(); });
 }
 function putPhoto(id, dataUrl){
-  if(dataUrl){
-    state.photos[id] = {dataUrl:dataUrl};
-    if(mode==='db') enqueue('photos/'+id, function(){ return DB.doc('photos/'+id).set({dataUrl:dataUrl}); });
-  }else{
-    delete state.photos[id];
-    if(mode==='db') enqueue('photos/'+id, function(){ return DB.doc('photos/'+id).delete(); });
-  }
-  if(mode!=='db') saveLocal();
-  render();
+  if(dataUrl) put('photos', id, {dataUrl:dataUrl});
+  else { del('photos', id); if(mode!=='db') saveLocal(); render(); }
 }
-function removeWatch(id){
-  delete state.watches[id]; delete state.usage[id]; delete state.photos[id]; render();
-  if(mode==='db'){
-    enqueue('watches/'+id, function(){ return DB.doc('watches/'+id).delete(); });
-    enqueue('usage/'+id,   function(){ return DB.doc('usage/'+id).delete(); });
-    enqueue('photos/'+id,  function(){ return DB.doc('photos/'+id).delete(); });
-  } else saveLocal();
-}
-function putUsage(id, u){
-  state.usage[id] = u; render();
-  if(mode==='db') enqueue('usage/'+id, function(){ return DB.doc('usage/'+id).set(u); });
-  else saveLocal();
-}
+function putWatch(id, w){ put('watches', id, w); }
+function putUsage(id, u){ put('usage', id, u); }
 function putConfig(c){
   state.config = c; render();
   if(mode==='db') enqueue('config/app', function(){ return DB.doc('config/app').set(c); });
   else saveLocal();
 }
+function removeWatch(id){
+  del('watches', id); del('usage', id); del('photos', id);
+  if(mode!=='db') saveLocal();
+  render();
+}
+function removeWish(id){ del('wishes', id); del('photos', id); if(mode!=='db') saveLocal(); render(); }
+function removeShop(id){
+  del('shops', id);
+  /* detach the shop from anything that pointed at it, keeping the typed name */
+  Object.keys(state.watches).forEach(function(wid){
+    var w = state.watches[wid], changed = false;
+    if(w.shopId === id){ w = clone(w); w.shopId = ''; changed = true; }
+    if(w.service && w.service.shopId === id){ w = changed ? w : clone(w); w.service.shopId = ''; changed = true; }
+    if(changed) put('watches', wid, w);
+  });
+  Object.keys(state.wishes).forEach(function(kid){
+    var k = state.wishes[kid];
+    if((k.shopIds||[]).indexOf(id) >= 0){
+      var n = clone(k); n.shopIds = n.shopIds.filter(function(s){ return s !== id; });
+      put('wishes', kid, n);
+    }
+  });
+  if(mode!=='db') saveLocal();
+  render();
+}
+
+/* config lives in its own collection keyed 'app' */
+
 
 /* ============ the maintenance maths ============ */
-/* Every day the movement is turning: each worn day, plus the `carry` days after it.
-   A run of consecutive wear therefore keeps running until `carry` days after the LAST day. */
 function runningSet(u, carry){
   var set = {}, mm = (u && u.months) || {};
   Object.keys(mm).forEach(function(k){
@@ -737,26 +880,22 @@ function schedule(w, u, cfg){
 
   var carry = cfg.carryDays == null ? 2 : cfg.carryDays;
   var interval = cfg.intervalYears || 4;
-  var target = diffDays(base, addYears(base, interval));   /* 4年分 ＝ 必要な稼働日数 */
+  var target = diffDays(base, addYears(base, interval));
   var rs = runningSet(u, carry);
-  /* accumulate running days, remembering the day the target was reached (it may be in the past) */
   var bs = serial(base), used = 0, hit = -1, span = Math.min(elapsed, 366*40);
   for(var i=0;i<span;i++){
     if(rs[bs+i]){ used++; if(hit < 0 && used >= target) hit = i; }
   }
 
-  var out = {
-    quartz:quartz, base:base, baseStr:baseStr,
-    baseKind: (!quartz && last) ? 'overhaul' : 'purchase',
-    elapsed:elapsed, used:used, carry:carry, maints:ms, overhauls:ohs
-  };
+  var out = { quartz:quartz, base:base, baseStr:baseStr,
+    baseKind:(!quartz && last) ? 'overhaul' : 'purchase',
+    elapsed:elapsed, used:used, carry:carry, maints:ms, overhauls:ohs,
+    purchaseElapsed: Math.max(0, diffDays(parseYMD(w.purchaseDate), now)) };
   if(quartz) return out;
 
   var maxY = Math.max(interval, cfg.maxYears || 8);
   var maxDue = addYears(base, maxY);
-
-  var dueCal = addYears(base, interval);                   /* 基準（青）: 使用と無関係 */
-  /* 実質（赤）: 到達済みならその日、未到達なら明日から毎日着け続けた場合の日 */
+  var dueCal = addYears(base, interval);
   var dueAct = hit >= 0 ? addDays(base, hit + 1) : addDays(now, Math.max(0, target - used));
   var capped = dueAct > maxDue;
   if(capped) dueAct = maxDue;
@@ -770,7 +909,8 @@ function schedule(w, u, cfg){
   return out;
 }
 
-function statusOf(s){
+function statusOf(w, s){
+  if(w && w.service) return {cls:'s-svc', label:'メンテナンス中'};
   if(!s) return {cls:'s-none', label:'購入日が未入力'};
   if(s.quartz) return {cls:'s-q', label:'クオーツ'};
   if(s.remainAct < 0)    return {cls:'s-over', label:'期限超過'};
@@ -778,12 +918,116 @@ function statusOf(s){
   return {cls:'s-ok', label:'良好'};
 }
 
+/* ============ shops ============ */
+function shopName(w){
+  if(w && w.shopId && state.shops[w.shopId]) return state.shops[w.shopId].name;
+  return (w && w.shop) || '';
+}
+function shopById(id){ return id ? state.shops[id] : null; }
+function sortedShops(){
+  return Object.keys(state.shops).sort(function(a,b){
+    var x = state.shops[a], y = state.shops[b];
+    return (x.order||0) - (y.order||0) || (x.name||'').localeCompare(y.name||'', 'ja');
+  });
+}
+/* {q} in a search URL is replaced with the model name */
+function patrolUrl(shop, query){
+  var raw = (shop.searchUrl && shop.searchUrl.trim()) ? shop.searchUrl : shop.url;
+  var u = safeUrl(raw);
+  if(!u) return '';
+  if(u.indexOf('%7Bq%7D') >= 0 || u.indexOf('{q}') >= 0){
+    return u.replace(/%7Bq%7D/gi, encodeURIComponent(query||'')).replace(/\{q\}/g, encodeURIComponent(query||''));
+  }
+  return u;
+}
+
+/* ============ ordering ============ */
+function orderedWatchIds(){
+  var ids = Object.keys(state.watches);
+  var manual = state.config.collectionSort === 'manual';
+  ids.sort(function(a,b){
+    var wa = state.watches[a], wb = state.watches[b];
+    if(manual){
+      var oa = wa.order == null ? 1e9 : wa.order, ob = wb.order == null ? 1e9 : wb.order;
+      if(oa !== ob) return oa - ob;
+      return (wa.createdAt||'').localeCompare(wb.createdAt||'');
+    }
+    var sa = schedule(wa, state.usage[a], state.config);
+    var sb = schedule(wb, state.usage[b], state.config);
+    var qa = !sa || sa.quartz, qb = !sb || sb.quartz;
+    if(qa !== qb) return qa ? 1 : -1;
+    if(qa) return (wa.createdAt||'').localeCompare(wb.createdAt||'');
+    return sa.remainAct - sb.remainAct;
+  });
+  return ids;
+}
+/* writes every changed row, then renders once */
+function commitOrder(ids){
+  ids.forEach(function(id, i){
+    var w = state.watches[id];
+    if(!w || w.order === i) return;
+    var n = clone(w); n.order = i;
+    state.watches[id] = n;
+    if(mode === 'db'){
+      (function(docId, body){
+        enqueue('watches/' + docId, function(){ return DB.doc('watches/' + docId).set(body); });
+      })(id, n);
+    }
+  });
+  if(state.config.collectionSort !== 'manual'){
+    state.config = Object.assign({}, state.config, {collectionSort:'manual'});
+    if(mode === 'db') enqueue('config/app', function(){ return DB.doc('config/app').set(state.config); });
+  }
+  if(mode !== 'db') saveLocal();
+  render();
+}
+
+/* ============ usage helpers ============ */
+function wornOn(id, d){
+  var u = state.usage[id];
+  if(!u || !u.months) return false;
+  var arr = u.months[mkey(d.getFullYear(), d.getMonth()+1)] || [];
+  return arr.indexOf(d.getDate()) >= 0;
+}
+function toggleDay(id, d){
+  var u = state.usage[id] ? clone(state.usage[id]) : {months:{}};
+  u.months = u.months || {};
+  var key = mkey(d.getFullYear(), d.getMonth()+1);
+  var arr = (u.months[key] || []).slice();
+  var i = arr.indexOf(d.getDate()), added;
+  if(i >= 0){ arr.splice(i,1); added = false; } else { arr.push(d.getDate()); added = true; }
+  if(arr.length) u.months[key] = arr.sort(function(a,b){ return a-b; });
+  else delete u.months[key];
+  putUsage(id, u);
+  return added;
+}
+
 /* ============ render ============ */
 function render(){
-  if(view.name==='detail' && !state.watches[view.id]) view = {name:'list', tab:'overview'};
-  if(view.name==='detail' && view.tab==='calc' && isQuartz(state.watches[view.id])) view.tab = 'overview';
-  $('#app').innerHTML = view.name==='detail' ? detailHTML(view.id, state.config) : listHTML(state.config);
+  if(view.detail && !state.watches[view.detail]){ view.detail = null; }
+  if(view.detail && view.tab === 'calc' && isQuartz(state.watches[view.detail])) view.tab = 'overview';
+  renderNav();
+  var el = $('#app');
+  if(view.detail) el.innerHTML = detailHTML(view.detail, state.config);
+  else if(view.page === 'wish')  el.innerHTML = wishPageHTML();
+  else if(view.page === 'shops') el.innerHTML = shopPageHTML();
+  else el.innerHTML = collectionHTML(state.config);
   $('#foot').innerHTML = footHTML();
+  $('#btnAdd').innerHTML = '<span class="ln">'
+    + (view.page === 'wish' ? '検討を' : view.page === 'shops' ? '店を' : '時計を')
+    + '</span>追加';
+}
+function renderNav(){
+  var svc = Object.keys(state.watches).filter(function(id){ return state.watches[id].service; }).length;
+  var pages = [
+    ['collection','コレクション', Object.keys(state.watches).length],
+    ['wish','検討リスト', Object.keys(state.wishes).length],
+    ['shops','利用店', Object.keys(state.shops).length]
+  ];
+  $('#nav').innerHTML = pages.map(function(p){
+    return '<button data-page="' + p[0] + '" aria-current="' + (view.page===p[0] && !view.detail) + '">'
+      + p[1] + '<span class="n">' + p[2] + '</span></button>';
+  }).join('');
 }
 function renderBanner(){
   var b = $('#banner');
@@ -796,132 +1040,218 @@ function renderBanner(){
 function footHTML(){
   var c = state.config;
   return '次回オーバーホール＝購入日（またはオーバーホール実施日）から稼働日を積み上げ、'
-       + (c.intervalYears||4) + ' 年分に達した日。上限 ' + (c.maxYears||8) + ' 年。'
-       + '稼働日＝着用した日とその後 ' + (c.carryDays==null?2:c.carryDays) + ' 日間。クオーツは対象外。'
-       + (mode==='db' ? ' データはクラウドに同期されています。'
-                      : (filePerm==='granted' ? ' 変更のたびに ' + esc(fileName) + ' へ自動保存されます。'
-                                              : ' データはこの端末に保存されています。'));
+    + (c.intervalYears||4) + ' 年分に達した日。上限 ' + (c.maxYears||8) + ' 年。'
+    + '稼働日＝着用した日とその後 ' + (c.carryDays==null?2:c.carryDays) + ' 日間。クオーツは対象外。'
+    + (mode==='db' ? ' データはクラウドに同期されています。'
+      : (filePerm==='granted' ? ' 変更のたびに ' + esc(fileName) + ' へ自動保存されます。'
+        : ' データはこの端末に保存されています。'));
 }
-
-function summary(cfg){
-  var ids = Object.keys(state.watches);
-  var over = 0, soon = 0, next = null, spend = 0;
-  ids.forEach(function(id){
-    var w = state.watches[id];
-    (w.maintenances||[]).forEach(function(m){ spend += Number(m.cost)||0; });
-    var s = schedule(w, state.usage[id], cfg);
-    if(!s || s.quartz) return;
-    if(s.remainAct < 0) over++; else if(s.remainAct <= 180) soon++;
-    if(!next || s.remainAct < next.rem) next = {rem:s.remainAct};
-  });
-  return {n:ids.length, over:over, soon:soon, next:next, spend:spend};
-}
-
 function thumbHTML(id, cls){
   var p = state.photos[id];
   if(p && p.dataUrl) return '<img class="' + cls + '" src="' + p.dataUrl + '" alt="">';
   return '<span class="' + cls + ' ph" aria-hidden="true">⌚</span>';
 }
 
-function listHTML(cfg){
+/* ---------- collection ---------- */
+function collectionHTML(cfg){
   var ids = Object.keys(state.watches);
   if(!ids.length){
-    return '<div style="height:28px"></div><div class="empty">'
+    return '<div style="height:26px"></div><div class="empty">'
       + '<h2>まだ 1 本も登録されていません</h2>'
-      + '<p>時計を登録し、着けた日をカレンダーで記録していくと、'
-      + 'ゼンマイが動いていた日数を積み上げて、次回オーバーホールの時期を計算します。</p>'
-      + '<div class="acts">'
-      + '<button class="btn btn-primary" data-act="add">時計を追加</button>'
-      + '<button class="btn" data-act="sample">サンプルを読み込む</button>'
-      + '</div></div>';
+      + '<p>時計を登録し、着けた日を記録していくと、ゼンマイが動いていた日数を積み上げて'
+      + '次回オーバーホールの時期を計算します。</p>'
+      + '<div class="acts"><button class="btn btn-primary" data-act="add">時計を追加</button>'
+      + '<button class="btn" data-act="sample">サンプルを読み込む</button></div></div>';
   }
 
-  var s = summary(cfg);
-  var nextTxt = s.next ? (s.next.rem < 0 ? '超過 ' + Math.abs(s.next.rem) : String(s.next.rem)) : '—';
-
-  var h = '<div class="strip">'
-    + '<div><div class="k">保有本数</div><div class="v">' + s.n + '<small>本</small></div></div>'
-    + '<div><div class="k">実質の最短期限</div><div class="v t-act">' + nextTxt + '<small>日</small></div></div>'
-    + '<div><div class="k">要対応</div><div class="v">' + (s.over + s.soon) + '<small>本</small></div></div>'
-    + '<div><div class="k">メンテ総額</div><div class="v" style="font-size:17px">' + esc(yen(s.spend)) + '</div></div>'
-    + '</div>';
-
-  ids.sort(function(a,b){
-    var sa = schedule(state.watches[a], state.usage[a], cfg);
-    var sb = schedule(state.watches[b], state.usage[b], cfg);
-    var qa = !sa || sa.quartz, qb = !sb || sb.quartz;
-    if(qa !== qb) return qa ? 1 : -1;
-    if(qa) return 0;
-    return sa.remainAct - sb.remainAct;
-  });
-
-  h += '<div class="sec-head"><h2>コレクション</h2><span class="line"></span>'
-     + '<span class="eyebrow">実質の期限が近い順</span></div><div class="grid">';
-
+  var over=0, soon=0, svc=0, next=null, buy=0, maint=0;
   ids.forEach(function(id){
     var w = state.watches[id];
-    var sc = schedule(w, state.usage[id], cfg);
-    var st = statusOf(sc);
-    h += '<button class="card ' + st.cls + '" data-open="' + esc(id) + '">'
-      + '<div class="card-top"><div class="card-id">' + thumbHTML(id, 'thumb')
-      + '<div style="min-width:0">'
-      + '<div class="maker">' + esc(w.maker || 'メーカー未設定') + '</div>'
-      + '<div class="model">' + esc(w.model) + '</div>'
-      + '<div class="yr">' + esc(w.modelYear ? w.modelYear + '年式' : '年式未設定')
-      + ' ・ ' + esc(w.condition || '—') + ' ・ ' + esc(w.movement || '機械式') + '</div>'
-      + '</div></div>';
-
-    if(!sc){
-      h += '<div class="nums"><div class="big" style="color:var(--ink-3)">—</div></div></div>'
-         + '<div class="card-foot"><span class="chip">' + esc(st.label) + '</span></div>';
-    }else if(sc.quartz){
-      h += '<div class="nums"><div class="big t-cal">' + sc.elapsed + '</div>'
-         + '<div class="lb">日 経過</div></div></div>'
-         + '<div class="card-foot"><span class="chip">' + esc(st.label) + '</span>'
-         + '<span class="t-cal">購入から ' + esc(yearsMonths(sc.elapsed)) + '</span></div>';
-    }else{
-      var na = sc.remainAct < 0 ? Math.abs(sc.remainAct) : sc.remainAct;
-      var nc = sc.remainCal < 0 ? Math.abs(sc.remainCal) : sc.remainCal;
-      h += '<div class="nums">'
-        + '<div class="big t-act">' + na + '</div>'
-        + '<div class="lb">日 ' + (sc.remainAct < 0 ? '超過' : '残り') + '（実質）</div>'
-        + '<div class="sub t-cal">' + nc + '</div>'
-        + '<div class="lb">日 ' + (sc.remainCal < 0 ? '超過' : '残り') + '（基準）</div>'
-        + '</div></div>'
-        + '<div class="bars">'
-        + '<div class="bar b-cal"><i style="width:' + Math.round(sc.progCal*100) + '%"></i></div>'
-        + '<div class="bar b-act"><i style="width:' + Math.round(sc.progAct*100) + '%"></i></div>'
-        + '</div>'
-        + '<div class="card-foot"><span class="chip">' + esc(st.label) + '</span>'
-        + '<span><span class="t-act">実質 ' + esc(jpDate(ymd(sc.dueAct))) + '</span>'
-        + (sc.capped ? ' <span class="tag">上限</span>' : '') + '</span></div>';
-    }
-    h += '</button>';
+    buy += Number(w.price)||0;
+    (w.maintenances||[]).forEach(function(m){ maint += Number(m.cost)||0; });
+    if(w.service) svc++;
+    var s = schedule(w, state.usage[id], cfg);
+    if(!s || s.quartz || w.service) return;
+    if(s.remainAct < 0) over++; else if(s.remainAct <= 180) soon++;
+    if(!next || s.remainAct < next) next = s.remainAct;
   });
+  var nextTxt = next == null ? '—' : (next < 0 ? '超過 ' + Math.abs(next) : String(next));
 
+  var h = '<div class="strip s4">'
+    + '<div><div class="k">保有本数</div><div class="v">' + ids.length + '<small>本</small></div></div>'
+    + '<div><div class="k">実質の最短期限</div><div class="v t-act">' + nextTxt + '<small>日</small></div></div>'
+    + '<div><div class="k">要対応</div><div class="v">' + (over+soon) + '<small>本</small></div></div>'
+    + '<div><div class="k">メンテ中</div><div class="v"' + (svc?' style="color:var(--warn)"':'') + '>' + svc + '<small>本</small></div></div>'
+    + '</div>'
+    + '<div class="strip s3">'
+    + '<div><div class="k">購入総額</div><div class="v money">' + esc(yen(buy)) + '</div></div>'
+    + '<div><div class="k">メンテ総額</div><div class="v money">' + esc(yen(maint)) + '</div></div>'
+    + '<div><div class="k">合計</div><div class="v money" style="color:var(--cal)">' + esc(yen(buy+maint)) + '</div></div>'
+    + '</div>';
+
+  var ordered = orderedWatchIds();
+
+  h += '<div class="sec-head"><h2>コレクション</h2><span class="line"></span>';
+  if(view.sortMode){
+    h += '<button class="btn btn-sm btn-primary" data-act="sortdone">並べ替えを終える</button>';
+  }else{
+    h += '<button class="btn btn-sm btn-ghost" data-act="togglesort">'
+      + (cfg.collectionSort === 'manual' ? '並び：手動' : '並び：期限順') + '</button>'
+      + '<button class="btn btn-sm" data-act="sortmode">並べ替え</button>';
+  }
+  h += '</div>';
+
+  if(view.sortMode){
+    h += '<div class="note" style="margin-top:0;margin-bottom:12px">'
+      + '左のつまみを押したまま動かすと並べ替えられます。▲▼ でも移動できます。</div>'
+      + '<div class="sortlist" id="sortlist">';
+    ordered.forEach(function(id, i){
+      var w = state.watches[id];
+      h += '<div class="sortrow" data-sid="' + esc(id) + '">'
+        + '<span class="handle" data-handle="' + esc(id) + '" aria-label="ドラッグして並べ替え">'
+        + '<svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true">'
+        + '<rect x="1" y="2" width="12" height="1.6" fill="currentColor"/>'
+        + '<rect x="1" y="7.2" width="12" height="1.6" fill="currentColor"/>'
+        + '<rect x="1" y="12.4" width="12" height="1.6" fill="currentColor"/></svg></span>'
+        + thumbHTML(id, 'thumb')
+        + '<span class="sid"><span class="sk">' + esc(w.maker||'—') + '</span>'
+        + '<div class="sm">' + esc(w.model) + '</div></span>'
+        + '<span class="updown"><button data-mv-up="' + esc(id) + '"' + (i===0?' disabled':'') + '>▲</button>'
+        + '<button data-mv-down="' + esc(id) + '"' + (i===ordered.length-1?' disabled':'') + '>▼</button></span>'
+        + '</div>';
+    });
+    return h + '</div>';
+  }
+
+  h += '<div class="grid">';
+  ordered.forEach(function(id){ h += watchCard(id, cfg); });
   return h + '</div>';
 }
 
-/* Two concentric arcs: outer = calendar progress (blue), inner = running-day progress (red). */
-function dualRing(pCal, pAct, midHTML){
-  function arc(r, w, color, p){
-    var c = 2*Math.PI*r;
-    return '<circle cx="66" cy="66" r="' + r + '" fill="none" stroke="var(--line)" stroke-width="' + w + '"></circle>'
-      + '<circle cx="66" cy="66" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="' + w + '"'
-      + ' stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) + '"'
-      + ' stroke-dashoffset="' + (c * (1 - Math.max(0, Math.min(1, p)))).toFixed(1) + '"'
-      + ' transform="rotate(-90 66 66)"></circle>';
+function watchCard(id, cfg){
+  var w = state.watches[id];
+  var sc = schedule(w, state.usage[id], cfg);
+  var st = statusOf(w, sc);
+  var n = today(), yst = addDays(n, -1);
+  var onToday = wornOn(id, n), onYest = wornOn(id, yst);
+
+  var h = '<div class="card st-line ' + st.cls + '">'
+    + '<div class="ctop"><div class="cid" data-open="' + esc(id) + '" style="cursor:pointer">'
+    + thumbHTML(id, 'thumb')
+    + '<div style="min-width:0">'
+    + '<div class="maker">' + esc(w.maker || 'メーカー未設定') + '</div>'
+    + '<div class="model">' + esc(w.model) + '</div>'
+    + '<div class="meta">' + esc(specLine(w)) + '</div>'
+    + '<div class="ages">' + agesLine(w, sc) + '</div>'
+    + '</div></div>';
+
+  if(w.service){
+    h += '<div class="nums"><div class="big" style="color:var(--warn)">—</div>'
+      + '<div class="lb">メンテナンス中</div></div></div>';
+  }else if(!sc){
+    h += '<div class="nums"><div class="big" style="color:var(--ink-3)">—</div>'
+      + '<div class="lb">購入日未入力</div></div></div>';
+  }else if(sc.quartz){
+    h += '<div class="nums"><div class="big t-cal">' + sc.elapsed + '</div>'
+      + '<div class="lb">日 経過</div></div></div>';
+  }else{
+    var na = sc.remainAct < 0 ? Math.abs(sc.remainAct) : sc.remainAct;
+    var nc = sc.remainCal < 0 ? Math.abs(sc.remainCal) : sc.remainCal;
+    h += '<div class="nums">'
+      + '<div class="big t-act">' + na + '</div>'
+      + '<div class="lb">日 ' + (sc.remainAct<0?'超過':'残り') + '（実質）</div>'
+      + '<div class="sml t-cal">' + nc + '</div>'
+      + '<div class="lb">日 ' + (sc.remainCal<0?'超過':'残り') + '（基準）</div>'
+      + '</div></div>'
+      + '<div class="bars">'
+      + '<div class="bar"><i style="width:' + Math.round(sc.progCal*100) + '%;background:var(--cal)"></i></div>'
+      + '<div class="bar"><i style="width:' + Math.round(sc.progAct*100) + '%;background:var(--act)"></i></div>'
+      + '</div>';
   }
-  return '<div class="ringwrap"><svg viewBox="0 0 132 132" width="132" height="132" aria-hidden="true">'
-    + arc(57, 8, 'var(--cal)', pCal) + arc(40, 7, 'var(--act)', pAct)
-    + '</svg>' + midHTML + '</div>';
+
+  if(w.service) h += serviceBlock(w.service);
+
+  if(!w.service){
+    h += '<div class="quick">'
+      + '<button class="qb' + (onToday?' on':'') + '" data-wear="' + esc(id) + '" data-off="0">'
+      + (onToday ? '✓ 今日 着用' : '今日 着用') + '</button>'
+      + '<button class="qb' + (onYest?' on':'') + '" data-wear="' + esc(id) + '" data-off="1">'
+      + (onYest ? '✓ 昨日 着用' : '昨日 着用') + '</button>'
+      + '<span class="hint">タップで記録</span></div>';
+  }
+
+  h += '<div class="cfoot"><span class="pill">' + esc(st.label) + '</span>';
+  if(w.service){
+    h += '<button class="btn btn-sm" data-act="svcedit" data-id="' + esc(id) + '">状況を更新</button>';
+  }else if(sc && !sc.quartz){
+    h += '<span class="t-act">実質 ' + esc(jpDate(ymd(sc.dueAct)))
+      + (sc.capped ? ' <span class="tag">上限</span>' : '') + '</span>';
+  }else if(sc && sc.quartz){
+    h += '<span class="t-cal">購入から ' + esc(ymLabel(sc.elapsed)) + '</span>';
+  }
+  return h + '</div></div>';
+}
+
+function specLine(w){
+  var p = [];
+  if(w.condition) p.push(w.condition);
+  if(isQuartz(w)) p.push('クオーツ');
+  else {
+    p.push(w.winding || '自動巻き');
+    p.push(w.complication || '三針');
+  }
+  return p.join(' ・ ');
+}
+function agesLine(w, sc){
+  var out = [];
+  if(w.purchaseDate){
+    var t = ymText(Math.max(0, diffDays(parseYMD(w.purchaseDate), today())));
+    out.push('購入から <b>' + t.y + '</b>年<b>' + t.m + '</b>か月');
+  }
+  if(w.modelYear){
+    var yrs = today().getFullYear() - Number(w.modelYear);
+    if(yrs >= 0) out.push(esc(w.modelYear) + '年式から <b>' + yrs + '</b>年');
+  }
+  return out.length ? out.join(' ／ ') : '<span style="color:var(--ink-3)">購入時期が未登録</span>';
+}
+function serviceBlock(sv){
+  var d = sv.nextActionDate ? diffDays(today(), parseYMD(sv.nextActionDate)) : null;
+  var sp = shopById(sv.shopId);
+  var nm = sp ? sp.name : (sv.shop || '');
+  var tel = sv.tel || (sp ? sp.tel : '');
+  var th = telHref(tel);
+  var h = '<div class="svc"><div class="r1"><span class="st">' + esc(sv.status || '対応中') + '</span>';
+  if(d != null){
+    h += '<span class="cd">' + (d < 0 ? Math.abs(d) : d)
+      + '<small> 日' + (d < 0 ? '超過' : d === 0 ? '（本日）' : '後の予定') + '</small></span>';
+  }
+  h += '</div><div class="r2">';
+  if(sv.nextActionDate) h += '<span>' + esc(jpDate(sv.nextActionDate)) + ' ' + esc(sv.nextActionLabel || '予定') + '</span>';
+  if(nm) h += '<span>' + esc(nm) + (sv.person ? ' ' + esc(sv.person) : '') + '</span>';
+  if(th) h += '<span><a href="' + esc(th) + '">' + esc(tel) + '</a></span>';
+  if(sv.returnMethod) h += '<span>' + esc(sv.returnMethod) + 'で受取</span>';
+  if(sv.sentDate) h += '<span style="color:var(--ink-3)">' + esc(jpDate(sv.sentDate)) + ' 預入</span>';
+  return h + '</div></div>';
+}
+
+/* ---------- detail ---------- */
+function dualRing(pCal, pAct, midHTML){
+  function arc(r, w, v, p){
+    var c = 2*Math.PI*r;
+    return '<circle cx="65" cy="65" r="' + r + '" fill="none" stroke="var(--line-2)" stroke-width="' + w + '" opacity=".5"/>'
+      + '<circle cx="65" cy="65" r="' + r + '" fill="none" stroke="var(' + v + ')" stroke-width="' + w + '"'
+      + ' stroke-linecap="butt" stroke-dasharray="' + c.toFixed(1) + '"'
+      + ' stroke-dashoffset="' + (c*(1-Math.max(0,Math.min(1,p)))).toFixed(1) + '" transform="rotate(-90 65 65)"/>';
+  }
+  return '<div class="ringwrap"><svg viewBox="0 0 130 130" width="130" height="130" aria-hidden="true">'
+    + arc(56, 8, '--cal', pCal) + arc(39, 6, '--act', pAct) + '</svg>' + midHTML + '</div>';
 }
 
 function detailHTML(id, cfg){
   var w  = state.watches[id];
   var u  = state.usage[id] || {months:{}};
   var sc = schedule(w, u, cfg);
-  var st = statusOf(sc);
+  var st = statusOf(w, sc);
 
   var h = '<button class="back" data-act="back">← コレクションへ戻る</button>';
   h += '<div class="hero ' + st.cls + '">';
@@ -938,18 +1268,20 @@ function detailHTML(id, cfg){
 
   h += '<div class="info">'
     + '<div class="idrow">' + (state.photos[id] && state.photos[id].dataUrl
-        ? '<img src="' + state.photos[id].dataUrl + '" alt="登録した時計の写真">' : '')
-    + '<div style="min-width:0"><div class="eyebrow">' + esc(w.maker || 'メーカー未設定') + '</div>'
+      ? '<img src="' + state.photos[id].dataUrl + '" alt="登録した時計の写真">' : '')
+    + '<div style="min-width:0"><div class="maker">' + esc(w.maker || 'メーカー未設定') + '</div>'
     + '<h2>' + esc(w.model) + '</h2></div></div>'
-    + '<div style="margin-top:8px; display:flex; gap:7px; align-items:center; flex-wrap:wrap">'
-    + '<span class="chip">' + esc(st.label) + '</span>'
-    + '<span class="tag">' + esc(w.movement || '機械式') + '</span>'
-    + (sc && !sc.quartz && sc.capped ? '<span class="tag" style="color:var(--soon)">上限 ' + sc.maxY + ' 年に到達</span>' : '')
+    + '<div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'
+    + '<span class="pill">' + esc(st.label) + '</span>'
+    + '<span class="tag">' + esc(specLine(w)) + '</span>'
+    + (sc && !sc.quartz && sc.capped ? '<span class="tag" style="color:var(--warn)">上限 ' + sc.maxY + ' 年</span>' : '')
     + '</div>';
+
+  if(w.service) h += serviceBlock(w.service);
 
   if(sc && !sc.quartz){
     h += '<div class="dual">'
-      + '<div class="d-cal"><div class="k">基準（使用日と無関係）</div>'
+      + '<div class="d-cal"><div class="k">基準（使用と無関係）</div>'
       + '<div class="rem t-cal">' + (sc.remainCal<0?'超過 '+Math.abs(sc.remainCal):sc.remainCal) + '<small> 日</small></div>'
       + '<div class="date t-cal">' + esc(jpDate(ymd(sc.dueCal))) + '</div>'
       + '<div class="prog">経過 ' + sc.elapsed + ' / ' + sc.target + ' 日</div></div>'
@@ -961,12 +1293,16 @@ function detailHTML(id, cfg){
   }else if(sc && sc.quartz){
     h += '<div class="dual"><div class="d-cal" style="grid-column:1/-1">'
       + '<div class="k">購入からの経過</div>'
-      + '<div class="rem t-cal">' + sc.elapsed + '<small> 日 ／ ' + esc(yearsMonths(sc.elapsed)) + '</small></div>'
+      + '<div class="rem t-cal">' + sc.elapsed + '<small> 日 ／ ' + esc(ymLabel(sc.elapsed)) + '</small></div>'
       + '<div class="prog">クオーツのため、オーバーホール時期の計算は行いません</div></div></div>';
   }
 
   h += '<div class="acts">'
-    + '<button class="btn btn-primary" data-act="addmaint">メンテナンスを記録</button>'
+    + (w.service
+      ? '<button class="btn btn-primary" data-act="svcedit" data-id="' + esc(id) + '">メンテ状況を更新</button>'
+        + '<button class="btn" data-act="svcdone" data-id="' + esc(id) + '">受取・完了にする</button>'
+      : '<button class="btn btn-primary" data-act="svcedit" data-id="' + esc(id) + '">メンテナンスに出す</button>'
+        + '<button class="btn" data-act="addmaint" data-id="' + esc(id) + '">記録を残す</button>')
     + '<button class="btn" data-act="edit">情報を編集</button>'
     + '</div></div></div>';
 
@@ -980,20 +1316,24 @@ function detailHTML(id, cfg){
 
   if(view.tab==='overview')      h += overviewHTML(id, w, u, sc);
   else if(view.tab==='calendar') h += calendarHTML(w, u, cfg);
-  else if(view.tab==='history')  h += historyHTML(w, sc);
-  else                           h += calcHTML(sc, cfg);
-
+  else if(view.tab==='history')  h += historyHTML(id, w, sc);
+  else                           h += calcHTML(id, sc, cfg);
   return h + '</div>';
 }
 
+function cell(k, v, mono){
+  return '<div><div class="k">' + esc(k) + '</div><div class="v' + (mono?' mono':'') + '">'
+    + esc(v == null || v === '' ? '—' : v) + '</div></div>';
+}
 function overviewHTML(id, w, u, sc){
   var spent = 0, ohCount = 0;
   (w.maintenances||[]).forEach(function(m){
     spent += Number(m.cost)||0;
-    if(maintType(m)==='overhaul') ohCount++;
+    if(maintType(m)==='overhaul' && !isQuartz(w)) ohCount++;
   });
   var totalDays = 0, mm = (u.months||{});
   Object.keys(mm).forEach(function(k){ totalDays += mm[k].length; });
+  var sp = shopById(w.shopId);
 
   var h = '';
   if(state.photos[id] && state.photos[id].dataUrl){
@@ -1003,46 +1343,47 @@ function overviewHTML(id, w, u, sc){
     + cell('メーカー', w.maker)
     + cell('購入モデル', w.model)
     + cell('駆動方式', w.movement || '機械式')
+    + cell('巻き上げ・表示', isQuartz(w) ? '—' : (w.winding||'自動巻き') + ' ・ ' + (w.complication||'三針'))
     + cell('購入年式', w.modelYear ? w.modelYear + ' 年' : '', true)
     + cell('購入時期', jpDate(w.purchaseDate), true)
-    + cell('購入店', w.shop)
     + cell('状態', w.condition)
     + cell('購入金額', yen(w.price), true)
     + cell('メンテナンス総額', yen(spent), true)
-    + cell('オーバーホール回数', ohCount + ' 回', true)
+    + cell(isQuartz(w) ? 'メンテナンス回数' : 'オーバーホール回数',
+        (isQuartz(w) ? (w.maintenances||[]).length : ohCount) + ' 回', true)
     + cell('着用した日の合計', totalDays + ' 日', true)
     + cell('うち稼働日の合計', sc ? sc.used + ' 日' : '—', true)
     + '</div>';
 
-  if(!sc){
-    h += '<div class="note">購入時期を入力すると、経過の計算が始まります。</div>';
-    return h;
-  }
+  /* 購入店 — 登録店ならリンクで開ける */
+  h += '<div class="spec" style="margin-top:10px"><div style="grid-column:1/-1">'
+    + '<div class="k">購入店</div><div class="v">';
+  if(sp){
+    var su = safeUrl(sp.url);
+    h += su ? '<a href="' + esc(su) + '" target="_blank" rel="noopener">' + esc(sp.name) + ' ↗</a>' : esc(sp.name);
+    if(sp.person) h += ' <span style="color:var(--ink-3);font-size:12px">担当 ' + esc(sp.person) + '</span>';
+    if(sp.tel) h += ' <a href="' + esc(telHref(sp.tel)) + '" style="font-size:12.5px">' + esc(sp.tel) + '</a>';
+  }else h += esc(w.shop || '—');
+  h += '</div></div></div>';
+
+  if(!sc){ h += '<div class="note">購入時期を入力すると、経過の計算が始まります。</div>'; return h; }
   if(sc.quartz){
     h += '<div class="note blue">クオーツのため、オーバーホールの起算・次回時期の計算は行いません。'
-       + '購入 <b>' + esc(jpDate(sc.baseStr)) + '</b> から <b>' + sc.elapsed + ' 日</b>（'
-       + esc(yearsMonths(sc.elapsed)) + '）が経過しています。'
-       + '電池交換やベルト交換などは「メンテナンス履歴」に残せます。</div>';
+      + '購入 <b>' + esc(jpDate(sc.baseStr)) + '</b> から <b>' + sc.elapsed + ' 日</b>（'
+      + esc(ymLabel(sc.elapsed)) + '）が経過しています。</div>';
     return h;
   }
-  h += '<div class="note">'
-    + '起算日 <b>' + esc(jpDate(sc.baseStr)) + '</b>（' + (sc.baseKind==='overhaul' ? 'オーバーホール実施日' : '購入日') + '）から、'
-    + '稼働日が <b>' + sc.target + ' 日</b>（' + sc.interval + ' 年分）に達した時点が次回です。'
-    + '現在 <b>' + sc.used + ' 日</b>が積み上がっており、あと <b>' + Math.max(0, sc.target - sc.used) + ' 日</b>の稼働が必要です。'
+  h += '<div class="note">起算日 <b>' + esc(jpDate(sc.baseStr)) + '</b>（'
+    + (sc.baseKind==='overhaul' ? 'オーバーホール実施日' : '購入日') + '）から、稼働日が <b>'
+    + sc.target + ' 日</b>（' + sc.interval + ' 年分）に達した時点が次回です。現在 <b>' + sc.used
+    + ' 日</b>が積み上がっており、あと <b>' + Math.max(0, sc.target - sc.used) + ' 日</b>の稼働が必要です。'
     + '<br><span class="t-cal">■</span> 基準 ' + esc(jpDate(ymd(sc.dueCal)))
-    + '（暦どおり ' + sc.interval + ' 年後）　'
-    + '<span class="t-act">■</span> 実質 ' + esc(jpDate(ymd(sc.dueAct)))
-    + '（明日から毎日着けた場合）'
-    + '</div>';
+    + '　<span class="t-act">■</span> 実質 ' + esc(jpDate(ymd(sc.dueAct))) + '（明日から毎日着けた場合）</div>';
   if(sc.capped){
-    h += '<div class="note cap">使用頻度にかかわらず <b>上限 ' + sc.maxY + ' 年</b>（'
-       + esc(jpDate(ymd(sc.maxDue))) + '）で打ち切っています。油脂の劣化は動かしていなくても進むためです。</div>';
+    h += '<div class="note warn">使用頻度にかかわらず <b>上限 ' + sc.maxY + ' 年</b>（'
+      + esc(jpDate(ymd(sc.maxDue))) + '）で打ち切っています。</div>';
   }
   return h;
-}
-function cell(k, v, mono){
-  return '<div><div class="k">' + esc(k) + '</div><div class="v' + (mono?' mono':'') + '">'
-       + esc(v == null || v === '' ? '—' : v) + '</div></div>';
 }
 
 function calendarHTML(w, u, cfg){
@@ -1055,92 +1396,79 @@ function calendarHTML(w, u, cfg){
   var dim = daysInMonth(cal.y, cal.m);
   var startDow = new Date(cal.y, cal.m-1, 1).getDay();
   var first = serial(new Date(cal.y, cal.m-1, 1));
+  var rs = runningSet(u, carry), run = 0, i;
+  for(i=0;i<dim;i++) if(rs[first+i]) run++;
+  var futureMonth = (cal.y > now.getFullYear()) || (cal.y===now.getFullYear() && cal.m > now.getMonth()+1);
 
-  var rs = runningSet(u, carry), run = 0;
-  for(var i=0;i<dim;i++) if(rs[first+i]) run++;
-
-  var isFutureMonth = (cal.y > now.getFullYear()) || (cal.y===now.getFullYear() && cal.m > now.getMonth()+1);
-
-  var h = '<div class="calbar">'
-    + '<span class="mo">' + cal.y + '年 ' + cal.m + '月</span>'
+  var h = '<div class="calbar"><span class="mo">' + cal.y + '年 ' + cal.m + '月</span>'
     + '<button class="btn btn-ghost btn-sm" data-act="thismonth">今月へ</button>'
-    + '<span class="nav"><button class="btn" data-act="prevmo" aria-label="前の月">‹</button>'
-    + '<button class="btn" data-act="nextmo" aria-label="次の月"' + (isFutureMonth?' disabled':'') + '>›</button></span>'
-    + '</div>';
+    + '<span class="nav2"><button class="btn" data-act="prevmo" aria-label="前の月">‹</button>'
+    + '<button class="btn" data-act="nextmo" aria-label="次の月"' + (futureMonth?' disabled':'') + '>›</button></span></div>';
 
-  /* bulk entry, right above the grid */
-  h += '<div class="bulk">'
-    + '<div class="row"><span class="lbl">まとめ入力</span>'
+  h += '<div class="bulk"><div class="row"><span class="lbl">まとめ入力</span>'
     + '<button class="btn btn-sm btn-primary" data-act="bulkall">この月を全日</button>'
     + '<button class="btn btn-sm" data-act="bulkclear">この月をクリア</button></div>'
     + '<div class="row"><span class="lbl">曜日で</span><span class="dowpick">';
-  for(var d0=0; d0<7; d0++){
-    h += '<button type="button" data-dow="' + d0 + '" aria-pressed="' + !!dowSel[d0] + '"'
-       + (d0===0 ? ' style="color:var(--over)"' : '') + '>' + DOW[d0] + '</button>';
+  for(i=0;i<7;i++){
+    h += '<button type="button" data-dow="' + i + '" aria-pressed="' + !!dowSel[i] + '"'
+      + (i===0?' style="color:var(--over)"':'') + '>' + DOW[i] + '</button>';
   }
-  h += '</span><button class="btn btn-sm" data-act="bulkdow">選んだ曜日を追加</button></div>'
-    + '</div>';
+  h += '</span><button class="btn btn-sm" data-act="bulkdow">選んだ曜日を追加</button></div></div>';
 
   h += '<div class="dow">';
-  for(var d1=0; d1<7; d1++) h += '<span>' + DOW[d1] + '</span>';
+  for(i=0;i<7;i++) h += '<span>' + DOW[i] + '</span>';
   h += '</div><div class="days">';
-  for(var b=0;b<startDow;b++) h += '<div class="day blank"></div>';
+  for(i=0;i<startDow;i++) h += '<div class="day blank"></div>';
   for(var d=1; d<=dim; d++){
     var dd = new Date(cal.y, cal.m-1, d);
-    var future = dd > now;
-    var isToday = ymd(dd) === ymd(now);
     var cls = worn[d] ? ' on' : (rs[first+d-1] ? ' run' : '');
-    h += '<button class="day' + cls + (isToday?' today':'') + '"' + (future?' disabled':'')
-       + ' data-day="' + d + '" aria-pressed="' + (!!worn[d]) + '" aria-label="' + cal.m + '月' + d + '日">' + d + '</button>';
+    h += '<button class="day' + cls + (ymd(dd)===ymd(now)?' today':'') + '"'
+      + (dd>now?' disabled':'') + ' data-day="' + d + '" aria-pressed="' + (!!worn[d])
+      + '" aria-label="' + cal.m + '月' + d + '日">' + d + '</button>';
   }
   h += '</div>';
 
-  h += '<div class="legend">'
-     + '<span><i class="w"></i>着用した日</span>'
-     + '<span><i class="r"></i>ゼンマイで稼働中（最終着用の ' + carry + ' 日後まで）</span>'
-     + '<span><i class="n"></i>停止</span></div>';
+  h += '<div class="legend"><span><i class="w"></i>着用した日</span>'
+    + '<span><i class="r"></i>ゼンマイで稼働中（最終着用の ' + carry + ' 日後まで）</span>'
+    + '<span><i class="n"></i>停止</span></div>';
 
   h += '<div class="mstats">'
     + '<div><div class="k">着用日数</div><div class="v">' + days.length + '</div></div>'
     + '<div><div class="k">稼働日数</div><div class="v t-act">' + run + ' <span style="font-size:11px;color:var(--ink-3)">/ ' + dim + '</span></div></div>'
-    + '<div><div class="k">停止日数</div><div class="v" style="color:var(--ink-3)">' + (dim - run) + '</div></div>'
+    + '<div><div class="k">停止日数</div><div class="v" style="color:var(--ink-3)">' + (dim-run) + '</div></div>'
     + '</div>';
 
-  h += '<div class="note">'
-    + (isQuartz(w)
-        ? 'クオーツのため、この記録はオーバーホール時期の計算には使われません。着用の記録としてお使いください。'
-        : '着けた日から <b>' + carry + ' 日後</b>までは巻き上げたゼンマイで動き続けているものとして稼働日に数えます。'
-          + '連続して着けた場合は、<b>最後に着けた日の ' + carry + ' 日後</b>までが稼働日です。'
-          + 'この稼働日だけを積み上げて ' + (cfg.intervalYears||4) + ' 年分になった日が、次回オーバーホールの時期です。')
-    + '</div>';
+  h += '<div class="note">' + (isQuartz(w)
+    ? 'クオーツのため、この記録はオーバーホール時期の計算には使われません。'
+    : '着けた日から <b>' + carry + ' 日後</b>までが稼働日です。連続して着けた場合は、'
+      + '<b>最後に着けた日の ' + carry + ' 日後</b>まで。この稼働日を積み上げて '
+      + (cfg.intervalYears||4) + ' 年分になった日が次回オーバーホールの時期です。') + '</div>';
   return h;
 }
 
-function historyHTML(w, sc){
+function historyHTML(id, w, sc){
   var quartz = isQuartz(w);
   var ms = (w.maintenances||[]).slice().sort(function(a,b){ return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
   var h = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">'
     + '<span class="eyebrow">' + ms.length + ' 件の記録</span>'
-    + '<button class="btn btn-primary" data-act="addmaint">メンテナンスを記録</button></div>';
-
+    + '<button class="btn btn-primary" data-act="addmaint" data-id="' + esc(id) + '">記録を残す</button></div>';
   if(!ms.length){
-    h += '<div class="empty" style="padding:30px 20px"><p style="margin-bottom:0">'
-       + 'まだ記録がありません。'
-       + (quartz ? '電池交換・ベルト交換・修理などを残せます。'
-                 : 'オーバーホールを記録すると、その日が次回の起算日になります。')
-       + '</p></div>';
+    h += '<div class="empty" style="padding:28px 18px"><p style="margin-bottom:0">まだ記録がありません。'
+      + (quartz ? '電池交換・ベルト交換・修理などを残せます。'
+        : 'オーバーホールを記録すると、その日が次回の起算日になります。') + '</p></div>';
     return h;
   }
   h += '<div class="hist">';
   ms.forEach(function(m){
-    var oh = maintType(m) === 'overhaul' && !quartz;
+    var oh = maintType(m)==='overhaul' && !quartz;
     var isBase = sc && !sc.quartz && oh && m.date === sc.baseStr;
-    h += '<div class="hrow ' + (oh ? 'oh' : 'rp') + '"><div style="min-width:0">'
+    var sp = shopById(m.shopId);
+    h += '<div class="hrow ' + (oh?'oh':'rp') + '"><div style="min-width:0">'
       + '<div class="d">' + esc(jpDate(m.date))
-      + '<span class="kind ' + (oh?'oh':'rp') + '">' + (oh ? 'オーバーホール' : '修理・その他') + '</span>'
+      + '<span class="kind ' + (oh?'oh':'rp') + '">' + (oh?'オーバーホール':'修理・その他') + '</span>'
       + (isBase ? ' <span class="tag">起算日</span>' : '') + '</div>'
-      + '<div class="c">' + esc(m.content || (oh ? 'オーバーホール一式' : 'メンテナンス')) + '</div>'
-      + '<div class="s">' + esc(m.shop || '店舗未記入') + '</div></div>'
+      + '<div class="c">' + esc(m.content || (oh?'オーバーホール一式':'メンテナンス')) + '</div>'
+      + '<div class="s">' + esc(sp ? sp.name : (m.shop || '店舗未記入')) + '</div></div>'
       + '<div style="display:flex;gap:10px;align-items:flex-start">'
       + '<div class="amt">' + esc(yen(m.cost)) + '</div>'
       + '<button class="btn btn-ghost" data-delmaint="' + esc(m.id) + '" title="削除" style="padding:2px 7px;font-size:16px;line-height:1.2">×</button>'
@@ -1150,18 +1478,16 @@ function historyHTML(w, sc){
   var tot = ms.reduce(function(a,m){ return a + (Number(m.cost)||0); }, 0);
   var ohs = ms.filter(function(m){ return maintType(m)==='overhaul'; });
   h += '<div class="note"><b>累計 ' + esc(yen(tot)) + '</b>／' + ms.length + ' 件'
-     + (quartz ? '。クオーツのため、起算日の更新は行いません。'
-               : '（うちオーバーホール ' + ohs.length + ' 回）。'
-                 + (ohs.length ? '最新のオーバーホール ' + esc(jpDate(ohs[0].date)) + ' を起算日としています。'
-                               : 'オーバーホールの記録が無いため、購入日を起算日としています。'))
-     + '</div>';
+    + (quartz ? '。クオーツのため、起算日の更新は行いません。'
+      : '（うちオーバーホール ' + ohs.length + ' 回）。'
+        + (ohs.length ? '最新のオーバーホール ' + esc(jpDate(ohs[0].date)) + ' を起算日としています。'
+          : 'オーバーホールの記録が無いため、購入日を起算日としています。')) + '</div>';
   return h;
 }
 
-/* month-by-month running days, from the base month to this month */
-function calcHTML(sc, cfg){
+function calcHTML(id, sc, cfg){
   if(!sc) return '<p style="color:var(--ink-2)">購入時期が未入力のため計算できません。</p>';
-  var u = state.usage[view.id] || {months:{}};
+  var u = state.usage[id] || {months:{}};
   var rs = runningSet(u, sc.carry);
   var now = today(), bs = serial(sc.base), ns = serial(now);
   var rows = [], cum = 0;
@@ -1177,7 +1503,7 @@ function calcHTML(sc, cfg){
         var sd = ms0 + d - 1; if(sd >= from && sd <= to) wornN++;
       });
       cum += run;
-      rows.push({y:y, m:m, inRange:inRange, worn:wornN, run:run, cum:cum, partial: inRange < dim});
+      rows.push({y:y, m:m, inRange:inRange, worn:wornN, run:run, cum:cum, partial:inRange < dim});
     }
     m++; if(m>12){ m=1; y++; }
   }
@@ -1186,133 +1512,388 @@ function calcHTML(sc, cfg){
   var shown = view.showAll ? rows.slice().reverse() : rows.slice(-24).reverse();
   var h = '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap">'
     + '<span class="eyebrow">月別の稼働日数</span>'
-    + '<span style="font-size:12.5px;color:var(--ink-2)">'
-    + '<span class="t-cal">経過 ' + sc.elapsed + ' 日</span> ／ '
-    + '<span class="t-act">稼働 ' + sc.used + ' 日</span> ／ 目標 ' + sc.target + ' 日</span></div>';
-
-  h += '<div class="tblwrap"><table><thead><tr>'
-    + '<th>月</th><th>対象日</th><th>着用</th><th>稼働</th><th>停止</th><th>累計稼働</th>'
-    + '</tr></thead><tbody>';
+    + '<span style="font-size:12.5px;color:var(--ink-2)"><span class="t-cal">経過 ' + sc.elapsed
+    + ' 日</span> ／ <span class="t-act">稼働 ' + sc.used + ' 日</span> ／ 目標 ' + sc.target + ' 日</span></div>';
+  h += '<div class="tblwrap"><table><thead><tr><th>月</th><th>対象日</th><th>着用</th><th>稼働</th><th>停止</th><th>累計稼働</th></tr></thead><tbody>';
   shown.forEach(function(r){
-    h += '<tr class="' + (r.partial ? 'part' : '') + '">'
+    h += '<tr class="' + (r.partial?'part':'') + '">'
       + '<td>' + r.y + '.' + pad(r.m) + (r.partial ? ' <span style="font-family:var(--f-body);font-size:11px">一部</span>' : '') + '</td>'
-      + '<td>' + r.inRange + '</td><td>' + r.worn + '</td>'
-      + '<td class="t-act">' + r.run + '</td>'
-      + '<td style="color:var(--ink-3)">' + (r.inRange - r.run) + '</td>'
-      + '<td>' + r.cum + '</td></tr>';
+      + '<td>' + r.inRange + '</td><td>' + r.worn + '</td><td class="t-act">' + r.run + '</td>'
+      + '<td style="color:var(--ink-3)">' + (r.inRange-r.run) + '</td><td>' + r.cum + '</td></tr>';
   });
-  h += '</tbody><tfoot><tr><td>合計</td><td>' + sc.elapsed + '</td><td></td>'
-     + '<td class="t-act">' + sc.used + '</td><td>' + (sc.elapsed - sc.used) + '</td><td>' + sc.used + '</td></tr></tfoot></table></div>';
-
+  h += '</tbody><tfoot><tr><td>合計</td><td>' + sc.elapsed + '</td><td></td><td class="t-act">' + sc.used
+    + '</td><td>' + (sc.elapsed-sc.used) + '</td><td>' + sc.used + '</td></tr></tfoot></table></div>';
   if(rows.length > 24){
     h += '<div style="margin-top:12px"><button class="btn" data-act="toggleall">'
-       + (view.showAll ? '直近 24 か月だけ表示' : 'すべての ' + rows.length + ' か月を表示') + '</button></div>';
+      + (view.showAll ? '直近 24 か月だけ表示' : 'すべての ' + rows.length + ' か月を表示') + '</button></div>';
   }
-  h += '<div class="note">'
-    + '<span class="t-cal">基準</span>：起算日から暦どおり ' + sc.interval + ' 年後の '
+  h += '<div class="note"><span class="t-cal">基準</span>：起算日から暦どおり ' + sc.interval + ' 年後の '
     + esc(jpDate(ymd(sc.dueCal))) + '。使用の有無に関係しません。'
-    + '<br><span class="t-act">実質</span>：稼働日が ' + sc.target + ' 日に達する日。'
-    + '現在 ' + sc.used + ' 日なので、明日から毎日着けたとして ' + esc(jpDate(ymd(sc.dueAct))) + '。'
-    + '着けない日が増えるほど後ろへ動きます。'
-    + '</div>';
+    + '<br><span class="t-act">実質</span>：稼働日が ' + sc.target + ' 日に達する日。現在 ' + sc.used
+    + ' 日なので、明日から毎日着けたとして ' + esc(jpDate(ymd(sc.dueAct))) + '。</div>';
   return h;
 }
 
+/* ---------- shops page ---------- */
+function shopPageHTML(){
+  var ids = sortedShops();
+  if(!ids.length){
+    return '<div style="height:26px"></div><div class="empty">'
+      + '<h2>利用店が未登録です</h2>'
+      + '<p>購入店やメンテナンスに出す店を登録しておくと、時計やメンテ記録から選べるようになり、'
+      + '店名をタップしてサイトを開けます。検討リストの巡回先にも使えます。</p>'
+      + '<div class="acts"><button class="btn btn-primary" data-act="addshop">店を追加</button></div></div>';
+  }
+  var h = '<div class="sec-head"><h2>利用店</h2><span class="line"></span>'
+    + '<span class="eyebrow">' + ids.length + ' 件</span></div>'
+    + '<div style="display:flex;flex-direction:column;gap:11px">';
+  ids.forEach(function(id){
+    var s = state.shops[id];
+    var u = safeUrl(s.url), th = telHref(s.tel);
+    var used = Object.keys(state.watches).filter(function(w){
+      var x = state.watches[w];
+      return x.shopId === id || (x.service && x.service.shopId === id)
+        || (x.maintenances||[]).some(function(m){ return m.shopId === id; });
+    }).length;
+    h += '<div class="shoprow"><div style="min-width:0;flex:1">'
+      + '<div class="nm">' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(s.name) + ' ↗</a>' : esc(s.name)) + '</div>'
+      + '<div class="dt">'
+      + (s.person ? '<div><span class="lbx">担当</span>' + esc(s.person) + '</div>' : '')
+      + (s.tel ? '<div><span class="lbx">電話</span><a href="' + esc(th) + '">' + esc(s.tel) + '</a></div>' : '')
+      + (s.address ? '<div><span class="lbx">住所</span>' + esc(s.address) + '</div>' : '')
+      + (s.searchUrl ? '<div><span class="lbx">検索</span><span style="color:var(--ink-3)">巡回用URL 登録済</span></div>' : '')
+      + (s.memo ? '<div style="color:var(--ink-3)">' + esc(s.memo) + '</div>' : '')
+      + (used ? '<div style="color:var(--ink-3)">' + used + ' 本で利用中</div>' : '')
+      + '</div></div>'
+      + '<div class="acts">'
+      + (u ? '<a class="btn btn-sm" href="' + esc(u) + '" target="_blank" rel="noopener">サイトを開く</a>' : '')
+      + '<button class="btn btn-sm" data-act="editshop" data-id="' + esc(id) + '">編集</button>'
+      + '</div></div>';
+  });
+  return h + '</div>';
+}
+
+/* ---------- wish page ---------- */
+function wishPageHTML(){
+  var ids = Object.keys(state.wishes).sort(function(a,b){
+    var x = state.wishes[a], y = state.wishes[b];
+    return (x.priority||2) - (y.priority||2)
+      || (x.order==null?1e9:x.order) - (y.order==null?1e9:y.order)
+      || (x.createdAt||'').localeCompare(y.createdAt||'');
+  });
+  if(!ids.length){
+    return '<div style="height:26px"></div><div class="empty">'
+      + '<h2>検討中のモデルはまだありません</h2>'
+      + '<p>次に狙っている時計を登録しておくと、希望価格や定価と一緒に管理でき、'
+      + '巡回する店を決めておけばワンタップで順番に見て回れます。</p>'
+      + '<div class="acts"><button class="btn btn-primary" data-act="addwish">検討を追加</button></div></div>';
+  }
+  var budget = 0;
+  ids.forEach(function(id){ budget += Number(state.wishes[id].targetPrice)||0; });
+
+  var h = '<div class="strip s3" style="margin-top:20px">'
+    + '<div><div class="k">検討中</div><div class="v">' + ids.length + '<small>本</small></div></div>'
+    + '<div><div class="k">希望価格の合計</div><div class="v money">' + esc(yen(budget)) + '</div></div>'
+    + '<div><div class="k">巡回先の登録</div><div class="v">' + Object.keys(state.shops).length + '<small>店</small></div></div>'
+    + '</div>';
+  h += '<div class="sec-head"><h2>検討リスト</h2><span class="line"></span>'
+    + '<span class="eyebrow">優先度順</span></div><div class="grid">';
+
+  ids.forEach(function(id){
+    var k = state.wishes[id];
+    var pr = k.priority || 2;
+    var shops = (k.shopIds||[]).filter(function(s){ return state.shops[s]; });
+    var last = k.lastChecked ? diffDays(parseYMD(k.lastChecked), today()) : null;
+    h += '<div class="card">'
+      + '<div class="ctop"><div class="cid">' + thumbHTML(id, 'thumb')
+      + '<div style="min-width:0">'
+      + '<div class="maker">' + esc(k.maker || 'メーカー未設定') + '</div>'
+      + '<div class="model">' + esc(k.model) + '</div>'
+      + '<div class="meta">' + esc(k.ref ? 'Ref. ' + k.ref + ' ・ ' : '') + esc(k.condPref || 'どちらでも') + '</div>'
+      + '</div></div>'
+      + '<span class="prio p' + pr + '">' + (pr===1?'高':pr===2?'中':'低') + '</span>'
+      + '</div>'
+      + '<div class="wprice">'
+      + '<div><div class="k">希望価格</div><div class="v t-act">' + esc(yen(k.targetPrice)) + '</div></div>'
+      + (k.listPrice ? '<div><div class="k">定価</div><div class="v">' + esc(yen(k.listPrice)) + '</div></div>' : '')
+      + (k.budget ? '<div><div class="k">上限</div><div class="v">' + esc(yen(k.budget)) + '</div></div>' : '')
+      + '</div>';
+
+    if(k.memo) h += '<div style="font-size:12px;color:var(--ink-2);margin-top:8px">' + esc(k.memo) + '</div>';
+
+    if(shops.length){
+      h += '<div class="shopchips">';
+      shops.forEach(function(s){ h += '<span class="sc">' + esc(state.shops[s].name) + '</span>'; });
+      h += '</div>';
+    }
+
+    h += '<div class="quick">'
+      + (shops.length
+        ? '<button class="qb on" data-act="patrol" data-id="' + esc(id) + '">巡回する（' + shops.length + '店）</button>'
+        : '<button class="qb" data-act="editwish" data-id="' + esc(id) + '">巡回する店を決める</button>')
+      + '<button class="qb" data-act="editwish" data-id="' + esc(id) + '">編集</button>'
+      + '</div>';
+
+    h += '<div class="cfoot">'
+      + (last == null
+        ? '<span style="color:var(--ink-3)">未チェック</span>'
+        : '<span' + (last >= 14 ? ' style="color:var(--warn)"' : '') + '>'
+          + (last === 0 ? '今日チェック済' : last + ' 日前にチェック') + '</span>')
+      + (last != null && last >= 14 ? '<span class="tag" style="color:var(--warn)">そろそろ確認</span>' : '')
+      + '</div></div>';
+  });
+  return h + '</div>';
+}
+
 /* ============ combobox ============ */
+var comboSource = 'maker';
 function comboListHTML(filter){
   var f = (filter||'').trim().toLowerCase(), h = '', hits = 0;
+  if(comboSource === 'shop'){
+    var ids = sortedShops();
+    var items = ids.filter(function(id){
+      return !f || (state.shops[id].name||'').toLowerCase().indexOf(f) >= 0;
+    });
+    hits = items.length;
+    if(hits){
+      h += '<div class="g">登録した店</div>';
+      items.forEach(function(id){
+        var s = state.shops[id];
+        h += '<button type="button" data-pickshop="' + esc(id) + '">' + esc(s.name)
+          + (s.person ? '<span style="color:var(--ink-3);font-size:11.5px"> ／ ' + esc(s.person) + '</span>' : '')
+          + '</button>';
+      });
+    }
+    if(!hits) h = '<div class="none">一致する店がありません。そのまま入力しても登録できます（「利用店」から登録しておくとサイトを開けます）。</div>';
+    return h;
+  }
   MAKERS.forEach(function(g){
-    var items = g[1].filter(function(n){ return !f || n.toLowerCase().indexOf(f) >= 0; });
-    if(!items.length) return;
-    hits += items.length;
+    var its = g[1].filter(function(n){ return !f || n.toLowerCase().indexOf(f) >= 0; });
+    if(!its.length) return;
+    hits += its.length;
     h += '<div class="g">' + esc(g[0]) + '</div>';
-    items.forEach(function(n){ h += '<button type="button" data-maker="' + esc(n) + '">' + esc(n) + '</button>'; });
+    its.forEach(function(n){ h += '<button type="button" data-maker="' + esc(n) + '">' + esc(n) + '</button>'; });
   });
   if(!hits) h = '<div class="none">一致するメーカーがありません。そのまま入力すれば登録できます。</div>';
   return h;
 }
-function comboOpen(open, filter){
-  var list = $('#makerList'); if(!list) return;
-  if(open){ list.innerHTML = comboListHTML(filter); list.hidden = false; list.scrollTop = 0; }
-  else list.hidden = true;
+/* a form can hold more than one combobox, so each keeps its own list element */
+function closeCombos(){
+  [].forEach.call(document.querySelectorAll('.combo-list'), function(l){ l.hidden = true; });
+}
+function comboOpen(box, open, filter){
+  var list = box && box.querySelector('.combo-list'); if(!list) return;
+  if(open){
+    comboSource = box.getAttribute('data-combo') || 'maker';
+    list.innerHTML = comboListHTML(filter);
+    list.hidden = false; list.scrollTop = 0;
+  } else list.hidden = true;
+}
+function comboField(id, value, placeholder, source, label){
+  return '<div class="full"><span class="lb">' + esc(label) + '</span>'
+    + '<div class="combo" data-combo="' + esc(source) + '">'
+    + '<input id="' + id + '" autocomplete="off" value="' + esc(value||'') + '" placeholder="' + esc(placeholder) + '">'
+    + '<button type="button" class="combo-tog" data-combo-toggle="' + esc(source) + '" aria-label="一覧を開く">▼</button>'
+    + '<div class="combo-list" hidden></div></div></div>';
 }
 
 /* ============ modals ============ */
-function closeModal(){ $('#modalRoot').innerHTML = ''; formPhoto = null; }
+function closeModal(){ $('#modalRoot').innerHTML = ''; formPhoto = null; photoTarget = null; patrol = null; }
 function openModal(html){
   $('#modalRoot').innerHTML = '<div class="veil" id="veil"><div class="modal" role="dialog" aria-modal="true">' + html + '</div></div>';
-  var f = $('#modalRoot input, #modalRoot select, #modalRoot textarea');
-  if(f) f.focus();
 }
-
-function watchForm(id){
-  var w = id ? state.watches[id] : {condition:'新品', movement:'機械式'};
-  var isNew = !id;
-  var mv = w.movement || '機械式';
-  var cur = (id && state.photos[id]) ? state.photos[id].dataUrl : null;
-  formPhoto = cur || null;
-
-  var h = '<h3>' + (isNew ? '時計を追加' : '情報を編集') + '</h3>'
-    + '<div class="sub">購入時期は、オーバーホールの記録が無いあいだの起算日になります。</div>'
-    + '<div class="fields">'
-    + '<div class="full"><span class="lb">写真</span><div class="photo-pick">'
-    + (cur ? '<img id="photoPreview" class="pv" src="' + cur + '" alt="登録した時計の写真">'
-           : '<span id="photoPreview" class="pv ph" aria-hidden="true">⌚</span>')
+function photoField(cur){
+  return '<div class="full"><span class="lb">写真</span><div class="photo-pick">'
+    + (cur ? '<img id="photoPreview" class="pv" src="' + cur + '" alt="登録した写真">'
+      : '<span id="photoPreview" class="pv ph" aria-hidden="true">⌚</span>')
     + '<div><div class="acts">'
     + '<button type="button" class="btn btn-sm" data-act="pickphoto">画像を選ぶ</button>'
     + '<button type="button" class="btn btn-sm btn-danger" id="photoRemove" data-act="rmphoto"' + (cur?'':' hidden') + '>削除</button>'
     + '</div><div style="font-size:11.5px;color:var(--ink-3);margin-top:6px">スマホなら撮影・写真アプリから選べます</div>'
-    + '</div></div></div>'
+    + '</div></div></div>';
+}
+function segField(id, label, opts, cur, hint){
+  var h = '<div class="full"><span class="lb">' + esc(label) + '</span><div class="seg" id="' + id + '">';
+  opts.forEach(function(o){
+    h += '<button type="button" data-seg="' + esc(o) + '" aria-pressed="' + (cur===o) + '">' + esc(o) + '</button>';
+  });
+  h += '</div>' + (hint ? '<div style="font-size:11.5px;color:var(--ink-3);margin-top:6px">' + esc(hint) + '</div>' : '') + '</div>';
+  return h;
+}
+
+function watchForm(id){
+  var w = id ? state.watches[id] : {condition:'新品', movement:'機械式', winding:'自動巻き', complication:'三針'};
+  var isNew = !id;
+  var cur = (id && state.photos[id]) ? state.photos[id].dataUrl : null;
+  formPhoto = cur || null; photoTarget = 'watch';
+
+  var h = '<h3>' + (isNew ? '時計を追加' : '情報を編集') + '</h3>'
+    + '<div class="sub">購入時期は、オーバーホールの記録が無いあいだの起算日になります。</div>'
+    + '<div class="fields">'
+    + photoField(cur)
     + '<label class="full"><span class="lb">購入モデル</span><input id="f_model" value="' + esc(w.model||'') + '" placeholder="例：Seamaster Diver 300M"></label>'
-    + '<div class="full"><span class="lb">メーカー（一覧から選ぶか、直接入力）</span>'
-    + '<div class="combo" id="makerCombo">'
-    + '<input id="f_maker" autocomplete="off" value="' + esc(w.maker||'') + '" placeholder="例：OMEGA">'
-    + '<button type="button" class="combo-tog" data-combo-toggle aria-label="メーカー一覧を開く">▼</button>'
-    + '<div class="combo-list" id="makerList" hidden></div></div></div>'
-    + '<div class="full"><span class="lb">駆動方式</span><div class="seg" id="f_mv">'
-    + '<button type="button" data-mv="機械式" aria-pressed="' + (mv==='機械式') + '">機械式</button>'
-    + '<button type="button" data-mv="クオーツ" aria-pressed="' + (mv==='クオーツ') + '">クオーツ</button>'
-    + '</div><div style="font-size:11.5px;color:var(--ink-3);margin-top:6px">クオーツはオーバーホールの対象外として扱います</div></div>'
+    + comboField('f_maker', w.maker, '例：OMEGA', 'maker', 'メーカー（一覧から選ぶか、直接入力）')
+    + segField('f_mv', '駆動方式', ['機械式','クオーツ'], w.movement || '機械式', 'クオーツはオーバーホールの対象外として扱います')
+    + segField('f_wind', '巻き上げ', ['自動巻き','手巻き'], w.winding || '自動巻き')
+    + segField('f_comp', '表示形式', ['三針','クロノグラフ'], w.complication || '三針')
     + '<label><span class="lb">購入年式</span><input id="f_year" type="number" min="1900" max="2100" step="1" value="' + esc(w.modelYear||'') + '" placeholder="2021"></label>'
     + '<label><span class="lb">購入時期</span><input id="f_pdate" type="date" value="' + esc(w.purchaseDate||'') + '"></label>'
     + '<label><span class="lb">購入金額（円）</span><input id="f_price" type="number" min="0" step="1000" value="' + esc(w.price==null?'':w.price) + '" placeholder="580000"></label>'
-    + '<label><span class="lb">購入店</span><input id="f_shop" value="' + esc(w.shop||'') + '" placeholder="例：正規店 銀座"></label>'
-    + '<div class="full"><span class="lb">状態</span><div class="seg" id="f_cond">'
-    + '<button type="button" data-cond="新品" aria-pressed="' + ((w.condition||'新品')==='新品') + '">新品</button>'
-    + '<button type="button" data-cond="中古" aria-pressed="' + (w.condition==='中古') + '">中古</button>'
-    + '</div></div>'
-    + '</div><div class="err" id="f_err"></div>'
+    + segField('f_cond', '状態', ['新品','中古'], w.condition || '新品')
+    + comboField('f_shop', shopName(w), '例：正規店 銀座', 'shop', '購入店（登録した店から選べます）')
+    + '</div><input type="hidden" id="f_shopId" value="' + esc(w.shopId||'') + '">'
+    + '<div class="err" id="f_err"></div>'
     + '<div class="modal-acts">'
     + (isNew ? '' : '<button class="btn btn-danger left" data-act="delete" data-id="' + esc(id) + '">この時計を削除</button>')
     + '<button class="btn" data-act="cancel">キャンセル</button>'
-    + '<button class="btn btn-primary" data-act="savewatch" data-id="' + esc(id||'') + '">保存</button>'
-    + '</div>';
+    + '<button class="btn btn-primary" data-act="savewatch" data-id="' + esc(id||'') + '">保存</button></div>';
   openModal(h);
 }
 
-function maintForm(id){
-  var quartz = isQuartz(state.watches[id]);
-  var h = '<h3>メンテナンスを記録</h3>'
+function maintForm(id, pre){
+  var w = state.watches[id], quartz = isQuartz(w);
+  pre = pre || {};
+  var h = '<h3>メンテナンスの記録</h3>'
     + '<div class="sub">' + (quartz ? 'クオーツのため、起算日の更新はありません。'
-                                    : 'オーバーホールを記録すると、その日が次回の起算日になります。') + '</div>'
-    + '<div class="fields">'
-    + '<div class="full">'
+      : 'オーバーホールを記録すると、その日が次回の起算日になります。') + '</div>'
+    + '<div class="fields"><div class="full">'
     + (quartz
-       ? '<div class="check" style="opacity:.55"><input type="checkbox" id="m_oh" disabled>'
-         + '<span class="t">オーバーホール<small>クオーツのため選べません。電池交換・ベルト交換・修理などとして記録されます。</small></span></div>'
-       : '<label class="check"><input type="checkbox" id="m_oh" checked>'
-         + '<span class="t">オーバーホール（分解掃除）<small>チェックを外すと、修理・ベルト交換などとして記録します。'
-         + 'その場合は次回オーバーホールの起算日は変わりません。</small></span></label>')
+      ? '<div class="check" style="opacity:.55"><input type="checkbox" id="m_oh" disabled>'
+        + '<span class="t">オーバーホール<small>クオーツのため選べません。電池交換・ベルト交換・修理などとして記録されます。</small></span></div>'
+      : '<label class="check"><input type="checkbox" id="m_oh" checked>'
+        + '<span class="t">オーバーホール（分解掃除）<small>チェックを外すと修理・ベルト交換などとして記録し、起算日は変わりません。</small></span></label>')
     + '</div>'
-    + '<label><span class="lb">実施日</span><input id="m_date" type="date" value="' + esc(ymd(today())) + '"></label>'
-    + '<label><span class="lb">金額（円）</span><input id="m_cost" type="number" min="0" step="1000" placeholder="72000"></label>'
-    + '<label class="full"><span class="lb">実施した店</span><input id="m_shop" placeholder="例：メーカーサービスセンター"></label>'
-    + '<label class="full"><span class="lb">内容</span><input id="m_content" placeholder="' + (quartz ? '電池交換、ベルト交換 など' : 'オーバーホール一式、パッキン交換 など') + '"></label>'
-    + '</div><div class="err" id="m_err"></div>'
+    + '<label><span class="lb">実施日</span><input id="m_date" type="date" value="' + esc(pre.date || ymd(today())) + '"></label>'
+    + '<label><span class="lb">金額（円）</span><input id="m_cost" type="number" min="0" step="1000" value="' + esc(pre.cost||'') + '" placeholder="72000"></label>'
+    + comboField('m_shop', pre.shop || '', '例：メーカーサービスセンター', 'shop', '実施した店')
+    + '<label class="full"><span class="lb">内容</span><input id="m_content" value="' + esc(pre.content||'') + '" placeholder="' + (quartz?'電池交換、ベルト交換 など':'オーバーホール一式、パッキン交換 など') + '"></label>'
+    + '</div><input type="hidden" id="m_shopId" value="' + esc(pre.shopId||'') + '">'
+    + '<div class="err" id="m_err"></div>'
+    + '<div class="modal-acts"><button class="btn" data-act="cancel">キャンセル</button>'
+    + '<button class="btn btn-primary" data-act="savemaint" data-id="' + esc(id) + '"'
+    + (pre.fromService ? ' data-fromsvc="1"' : '') + '>記録する</button></div>';
+  openModal(h);
+}
+
+function serviceForm(id){
+  var w = state.watches[id];
+  var sv = w.service || { sentDate: ymd(today()), status: SVC_STATUS[0], returnMethod:'引き取り' };
+  var sp = shopById(sv.shopId);
+  var h = '<h3>' + (w.service ? 'メンテナンスの状況' : 'メンテナンスに出す') + '</h3>'
+    + '<div class="sub">' + esc(w.model) + '。次のアクション予定日までの残日数がコレクションに表示されます。</div>'
+    + '<div class="fields">'
+    + '<label><span class="lb">預けた日</span><input id="v_sent" type="date" value="' + esc(sv.sentDate || ymd(today())) + '"></label>'
+    + '<label><span class="lb">現在の状態</span><select id="v_status">'
+    + SVC_STATUS.map(function(s){ return '<option' + (sv.status===s?' selected':'') + '>' + esc(s) + '</option>'; }).join('')
+    + (SVC_STATUS.indexOf(sv.status) < 0 && sv.status ? '<option selected>' + esc(sv.status) + '</option>' : '')
+    + '</select></label>'
+    + '<label><span class="lb">次のアクション予定日</span><input id="v_next" type="date" value="' + esc(sv.nextActionDate||'') + '"></label>'
+    + '<label><span class="lb">その予定の内容</span><input id="v_nextlb" value="' + esc(sv.nextActionLabel||'') + '" placeholder="見積もり連絡／仕上がり など"></label>'
+    + comboField('v_shop', sp ? sp.name : (sv.shop||''), '例：メーカーサービスセンター', 'shop', '預けた店')
+    + '<label><span class="lb">担当者</span><input id="v_person" value="' + esc(sv.person || (sp?sp.person:'') || '') + '" placeholder="田中"></label>'
+    + '<label><span class="lb">連絡先（電話）</span><input id="v_tel" value="' + esc(sv.tel || (sp?sp.tel:'') || '') + '" placeholder="03-1234-5678"></label>'
+    + segField('v_ret', '完成時の受取', ['引き取り','郵送'], sv.returnMethod || '引き取り')
+    + '<label class="full"><span class="lb">メモ</span><textarea id="v_memo" placeholder="見積もり金額、伝えられた内容など">' + esc(sv.memo||'') + '</textarea></label>'
+    + '</div><input type="hidden" id="v_shopId" value="' + esc(sv.shopId||'') + '">'
+    + '<div class="err" id="v_err"></div>'
     + '<div class="modal-acts">'
+    + (w.service ? '<button class="btn btn-danger left" data-act="svccancel" data-id="' + esc(id) + '">メンテ中を取り消す</button>' : '')
     + '<button class="btn" data-act="cancel">キャンセル</button>'
-    + '<button class="btn btn-primary" data-act="savemaint" data-id="' + esc(id) + '">記録する</button>'
-    + '</div>';
+    + '<button class="btn btn-primary" data-act="savesvc" data-id="' + esc(id) + '">保存</button></div>';
+  openModal(h);
+}
+
+function shopForm(id){
+  var s = id ? state.shops[id] : {};
+  var h = '<h3>' + (id ? '店の情報' : '利用店を追加') + '</h3>'
+    + '<div class="sub">登録しておくと、時計やメンテ記録から選べて、名前をタップでサイトが開きます。</div>'
+    + '<div class="fields">'
+    + '<label class="full"><span class="lb">店名</span><input id="s_name" value="' + esc(s.name||'') + '" placeholder="例：〇〇時計店 銀座本店"></label>'
+    + '<label><span class="lb">担当者</span><input id="s_person" value="' + esc(s.person||'') + '" placeholder="田中"></label>'
+    + '<label><span class="lb">電話</span><input id="s_tel" value="' + esc(s.tel||'') + '" placeholder="03-1234-5678"></label>'
+    + '<label class="full"><span class="lb">住所</span><input id="s_addr" value="' + esc(s.address||'') + '" placeholder="東京都中央区銀座…"></label>'
+    + '<label class="full"><span class="lb">ホームページ</span><input id="s_url" value="' + esc(s.url||'') + '" placeholder="example.com"></label>'
+    + '<label class="full"><span class="lb">巡回用URL（任意）</span><input id="s_surl" value="' + esc(s.searchUrl||'') + '" placeholder="example.com/search?q={q}"></label>'
+    + '<div class="full" style="font-size:11.5px;color:var(--ink-3);margin-top:-6px">'
+    + '検討リストの巡回で開くページです。空ならホームページを開きます。'
+    + 'URLに <b>{q}</b> を入れておくと、そこにモデル名が入ります。</div>'
+    + '<label class="full"><span class="lb">メモ</span><textarea id="s_memo" placeholder="営業時間、得意分野など">' + esc(s.memo||'') + '</textarea></label>'
+    + '</div><div class="err" id="s_err"></div>'
+    + '<div class="modal-acts">'
+    + (id ? '<button class="btn btn-danger left" data-act="delshop" data-id="' + esc(id) + '">この店を削除</button>' : '')
+    + '<button class="btn" data-act="cancel">キャンセル</button>'
+    + '<button class="btn btn-primary" data-act="saveshop" data-id="' + esc(id||'') + '">保存</button></div>';
+  openModal(h);
+}
+
+function wishForm(id){
+  var k = id ? state.wishes[id] : {condPref:'どちらでも', priority:2};
+  var cur = (id && state.photos[id]) ? state.photos[id].dataUrl : null;
+  formPhoto = cur || null; photoTarget = 'wish';
+  var picked = k.shopIds || [];
+  var shopIds = sortedShops();
+
+  var h = '<h3>' + (id ? '検討中のモデル' : '検討リストに追加') + '</h3>'
+    + '<div class="sub">巡回する店を選んでおくと、一覧から順にサイトを開けます。</div>'
+    + '<div class="fields">'
+    + photoField(cur)
+    + '<label class="full"><span class="lb">モデル名</span><input id="k_model" value="' + esc(k.model||'') + '" placeholder="例：Explorer 1 124270"></label>'
+    + comboField('k_maker', k.maker, '例：ROLEX', 'maker', 'メーカー')
+    + '<label><span class="lb">リファレンス番号</span><input id="k_ref" value="' + esc(k.ref||'') + '" placeholder="124270"></label>'
+    + segField('k_cond', '希望する状態', ['新品','中古','どちらでも'], k.condPref || 'どちらでも')
+    + '<label><span class="lb">希望価格（円）</span><input id="k_target" type="number" min="0" step="10000" value="' + esc(k.targetPrice==null?'':k.targetPrice) + '" placeholder="900000"></label>'
+    + '<label><span class="lb">定価（円）</span><input id="k_list" type="number" min="0" step="10000" value="' + esc(k.listPrice==null?'':k.listPrice) + '" placeholder="1100000"></label>'
+    + '<label><span class="lb">予算上限（円）</span><input id="k_budget" type="number" min="0" step="10000" value="' + esc(k.budget==null?'':k.budget) + '" placeholder="1050000"></label>'
+    + segField('k_prio', '優先度', ['高','中','低'], k.priority===1?'高':k.priority===3?'低':'中')
+    + '<div class="full"><span class="lb">巡回する店</span><div class="pickgrid" id="k_shops">'
+    + (shopIds.length ? shopIds.map(function(sid){
+        return '<label><input type="checkbox" value="' + esc(sid) + '"' + (picked.indexOf(sid)>=0?' checked':'') + '>'
+          + esc(state.shops[sid].name) + '</label>';
+      }).join('')
+      : '<div class="none2">まず「利用店」で店を登録してください。</div>')
+    + '</div></div>'
+    + '<label class="full"><span class="lb">メモ</span><textarea id="k_memo" placeholder="狙っている理由、条件、相場など">' + esc(k.memo||'') + '</textarea></label>'
+    + '</div><div class="err" id="k_err"></div>'
+    + '<div class="modal-acts">'
+    + (id ? '<button class="btn btn-danger left" data-act="delwish" data-id="' + esc(id) + '">削除</button>' : '')
+    + '<button class="btn" data-act="cancel">キャンセル</button>'
+    + '<button class="btn btn-primary" data-act="savewish" data-id="' + esc(id||'') + '">保存</button></div>';
+  openModal(h);
+}
+
+function patrolSheet(){
+  if(!patrol) return;
+  var k = state.wishes[patrol.wishId];
+  if(!k){ closeModal(); return; }
+  var shops = (k.shopIds||[]).filter(function(s){ return state.shops[s]; });
+  var doneCount = shops.filter(function(s){ return patrol.done[s]; }).length;
+  var nextIdx = shops.findIndex(function(s){ return !patrol.done[s]; });
+
+  var h = '<h3>巡回：' + esc(k.model) + '</h3>'
+    + '<div class="sub">上から順にタップすると、その店のページが新しいタブで開きます。'
+    + '戻ってきたら次の店へ進んでください。</div><div class="patrol">';
+  shops.forEach(function(sid, i){
+    var s = state.shops[sid];
+    var url = patrolUrl(s, k.model);
+    var done = !!patrol.done[sid];
+    var isNext = i === nextIdx;
+    if(url){
+      h += '<a class="pstep' + (done?' done':'') + (isNext?' next':'') + '" href="' + esc(url) + '"'
+        + ' target="_blank" rel="noopener" data-patrolgo="' + esc(sid) + '">'
+        + '<span class="no">' + (done ? '✓' : (i+1)) + '</span>'
+        + '<span class="nm2">' + esc(s.name) + '<small>' + esc(url.replace(/^https?:\/\//,'').slice(0,46)) + '</small></span>'
+        + '<span class="go">開く ↗</span></a>';
+    }else{
+      h += '<div class="pstep done"><span class="no">' + (i+1) + '</span>'
+        + '<span class="nm2">' + esc(s.name) + '<small>URLが未登録です</small></span></div>';
+    }
+  });
+  h += '</div>';
+  h += '<div class="note" style="margin-top:14px">' + doneCount + ' / ' + shops.length + ' 店をチェックしました。'
+    + (k.lastChecked ? '前回は ' + esc(jpDate(k.lastChecked)) + '。' : '') + '</div>';
+  h += '<div class="modal-acts"><button class="btn" data-act="cancel">閉じる</button>'
+    + '<button class="btn btn-primary" data-act="patroldone" data-id="' + esc(patrol.wishId) + '">'
+    + '今日チェックしたと記録する</button></div>';
   openModal(h);
 }
 
@@ -1320,39 +1901,28 @@ function settingsForm(){
   var c = state.config;
   var h = '<h3>設定</h3><div class="sub">すべての機械式時計に適用されます。</div>'
     + '<div class="fields">'
-    + '<label><span class="lb">オーバーホール周期（年）</span>'
-    + '<input id="s_years" type="number" min="1" max="20" step="1" value="' + esc(c.intervalYears||4) + '"></label>'
-    + '<label><span class="lb">上限（年）</span>'
-    + '<input id="s_max" type="number" min="1" max="30" step="1" value="' + esc(c.maxYears||8) + '"></label>'
-    + '<label class="full"><span class="lb">着用後に動き続ける日数（パワーリザーブ）</span>'
-    + '<input id="s_carry" type="number" min="0" max="10" step="1" value="' + esc(c.carryDays==null?2:c.carryDays) + '"></label>'
+    + '<label><span class="lb">オーバーホール周期（年）</span><input id="s_years" type="number" min="1" max="20" step="1" value="' + esc(c.intervalYears||4) + '"></label>'
+    + '<label><span class="lb">上限（年）</span><input id="s_max" type="number" min="1" max="30" step="1" value="' + esc(c.maxYears||8) + '"></label>'
+    + '<label class="full"><span class="lb">着用後に動き続ける日数（パワーリザーブ）</span><input id="s_carry" type="number" min="0" max="10" step="1" value="' + esc(c.carryDays==null?2:c.carryDays) + '"></label>'
     + '</div>'
-    + '<div class="note" style="margin-top:16px">'
-    + '<span class="t-cal">基準</span>は起算日から暦どおりの年数で、使用の有無に関係しません。'
+    + '<div class="note" style="margin-top:16px"><span class="t-cal">基準</span>は起算日から暦どおりの年数で、使用の有無に関係しません。'
     + '<span class="t-act">実質</span>は稼働日だけを積み上げ、周期の年数分に達した日です。'
-    + '着けない日は積み上がらないので、実質は基準より後ろになります。'
-    + 'ただし上限の年数を超えることはありません。'
-    + '</div>';
-
+    + '着けない日は積み上がらないので実質は基準より後ろになりますが、上限の年数は超えません。</div>';
   if(!IS_HOSTED){
     var linked = fileHandle && filePerm === 'granted';
     h += '<div class="dsec"><span class="lb">データの保存先</span>'
-      + '<p>' + (linked
-          ? '<b style="color:var(--ok)">' + esc(fileName) + '</b> に自動保存しています。'
-          : 'この端末のブラウザの中だけに保存しています。'
-            + '機種変更や他の端末へ移すときは、バックアップを書き出してください。') + '</p>'
+      + '<p>' + (linked ? '<b style="color:var(--ok)">' + esc(fileName) + '</b> に自動保存しています。'
+        : 'この端末のブラウザの中だけに保存しています。他の端末へ移すときはバックアップを書き出してください。') + '</p>'
       + '<div class="row">'
       + (window.showSaveFilePicker
-          ? (linked ? '<button class="btn btn-sm" data-act="unlinkfile">接続を解除</button>'
-                    : '<button class="btn btn-sm btn-primary" data-act="linkfile">データファイルを指定</button>')
-          : '')
+        ? (linked ? '<button class="btn btn-sm" data-act="unlinkfile">接続を解除</button>'
+          : '<button class="btn btn-sm btn-primary" data-act="linkfile">データファイルを指定</button>') : '')
       + '<button class="btn btn-sm" data-act="export">バックアップを書き出す</button>'
       + '<button class="btn btn-sm" data-act="import">バックアップを読み込む</button>'
       + '</div></div>';
   }
-
   h += '<div class="modal-acts"><button class="btn" data-act="cancel">キャンセル</button>'
-     + '<button class="btn btn-primary" data-act="savecfg">保存</button></div>';
+    + '<button class="btn btn-primary" data-act="savecfg">保存</button></div>';
   openModal(h);
 }
 
@@ -1363,18 +1933,18 @@ function toast(msg){
   el.className = 'toast'; el.textContent = msg; el.setAttribute('role','status');
   document.body.appendChild(el);
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(function(){ el.remove(); }, 4200);
+  toastTimer = setTimeout(function(){ el.remove(); }, 4000);
 }
 
 /* ============ bulk calendar entry ============ */
 function editMonth(fn){
-  var u = state.usage[view.id] ? clone(state.usage[view.id]) : {months:{}};
+  var u = state.usage[view.detail] ? clone(state.usage[view.detail]) : {months:{}};
   u.months = u.months || {};
   var key = mkey(cal.y, cal.m);
-  var next = fn((u.months[key] || []).slice(), key);
+  var next = fn((u.months[key] || []).slice());
   if(next.length) u.months[key] = next.sort(function(a,b){ return a-b; });
   else delete u.months[key];
-  putUsage(view.id, u);
+  putUsage(view.detail, u);
 }
 function lastEditableDay(){
   var now = today(), dim = daysInMonth(cal.y, cal.m);
@@ -1383,77 +1953,172 @@ function lastEditableDay(){
   return dim;
 }
 
+/* ============ drag to reorder ============ */
+var drag = null;
+document.addEventListener('pointerdown', function(e){
+  var handle = e.target.closest('[data-handle]');
+  if(!handle) return;
+  var row = handle.closest('.sortrow');
+  var list = $('#sortlist');
+  if(!row || !list) return;
+  e.preventDefault();
+  drag = {row:row, list:list, id:handle.getAttribute('data-handle')};
+  row.classList.add('dragging');
+  handle.setPointerCapture(e.pointerId);
+  drag.handle = handle;
+});
+document.addEventListener('pointermove', function(e){
+  if(!drag) return;
+  e.preventDefault();
+  var rows = [].slice.call(drag.list.querySelectorAll('.sortrow:not(.dragging)'));
+  var after = rows.reduce(function(closest, child){
+    var box = child.getBoundingClientRect();
+    var offset = e.clientY - box.top - box.height/2;
+    if(offset < 0 && offset > closest.offset) return {offset:offset, el:child};
+    return closest;
+  }, {offset: Number.NEGATIVE_INFINITY, el:null}).el;
+  if(after) drag.list.insertBefore(drag.row, after);
+  else drag.list.appendChild(drag.row);
+});
+document.addEventListener('pointerup', function(){
+  if(!drag) return;
+  drag.row.classList.remove('dragging');
+  var ids = [].slice.call(drag.list.querySelectorAll('.sortrow')).map(function(r){ return r.getAttribute('data-sid'); });
+  drag = null;
+  commitOrder(ids);
+  render();
+});
+document.addEventListener('pointercancel', function(){
+  if(!drag) return;
+  drag.row.classList.remove('dragging');
+  drag = null; render();
+});
+
 /* ============ events ============ */
 document.addEventListener('click', function(e){
   if(e.target.id === 'veil'){ closeModal(); return; }
-  var t = e.target.closest('[data-open],[data-act],[data-tab],[data-day],[data-cond],[data-mv],[data-dow],[data-delmaint],[data-combo-toggle],[data-maker]');
 
-  var list = $('#makerList');
-  if(list && !list.hidden && !e.target.closest('#makerCombo')) list.hidden = true;
+  /* patrol links: mark done, then let the browser open the tab */
+  var pg = e.target.closest('[data-patrolgo]');
+  if(pg && patrol){
+    patrol.done[pg.getAttribute('data-patrolgo')] = true;
+    setTimeout(patrolSheet, 60);
+    return;
+  }
+  if(e.target.closest('a[href]')) return;
 
+  var t = e.target.closest('[data-open],[data-act],[data-tab],[data-day],[data-seg],[data-dow],'
+    + '[data-delmaint],[data-combo-toggle],[data-maker],[data-pickshop],[data-page],[data-wear],'
+    + '[data-mv-up],[data-mv-down]');
+
+  if(!e.target.closest('.combo')) closeCombos();
   if(!t) return;
   var act = t.getAttribute('data-act');
 
+  if(t.hasAttribute('data-page')){
+    view.page = t.getAttribute('data-page'); view.detail = null; view.sortMode = false;
+    window.scrollTo(0,0); render(); return;
+  }
   if(t.hasAttribute('data-combo-toggle')){
-    var l = $('#makerList');
-    comboOpen(l.hidden, l.hidden ? $('#f_maker').value : '');
+    var tbox = t.closest('.combo');
+    var wasHidden = tbox.querySelector('.combo-list').hidden;
+    closeCombos();
+    if(wasHidden) comboOpen(tbox, true, '');
     return;
   }
-  if(t.hasAttribute('data-maker')){ $('#f_maker').value = t.getAttribute('data-maker'); comboOpen(false); return; }
-
+  if(t.hasAttribute('data-maker')){
+    var mbox = t.closest('.combo');
+    mbox.querySelector('input').value = t.getAttribute('data-maker');
+    comboOpen(mbox, false); return;
+  }
+  if(t.hasAttribute('data-pickshop')){
+    var sid = t.getAttribute('data-pickshop'), sh = state.shops[sid];
+    var box = t.closest('.combo'), inp = box.querySelector('input');
+    inp.value = sh.name;
+    var hid = inp.id === 'f_shop' ? '#f_shopId' : inp.id === 'm_shop' ? '#m_shopId' : '#v_shopId';
+    if($(hid)) $(hid).value = sid;
+    if(inp.id === 'v_shop'){
+      if($('#v_person') && !$('#v_person').value) $('#v_person').value = sh.person || '';
+      if($('#v_tel') && !$('#v_tel').value) $('#v_tel').value = sh.tel || '';
+    }
+    comboOpen(box, false); return;
+  }
   if(t.hasAttribute('data-open')){
-    view = {name:'detail', id:t.getAttribute('data-open'), tab:'overview', showAll:false};
+    view.detail = t.getAttribute('data-open'); view.tab = 'overview'; view.showAll = false;
     cal = null; window.scrollTo(0,0); render(); return;
   }
   if(t.hasAttribute('data-tab')){ view.tab = t.getAttribute('data-tab'); render(); return; }
-
-  if(t.hasAttribute('data-cond') || t.hasAttribute('data-mv')){
+  if(t.hasAttribute('data-seg')){
     Array.prototype.forEach.call(t.parentNode.children, function(b){ b.setAttribute('aria-pressed', b===t); });
     return;
   }
   if(t.hasAttribute('data-dow')){
-    var k = +t.getAttribute('data-dow');
-    dowSel[k] = !dowSel[k];
-    t.setAttribute('aria-pressed', !!dowSel[k]);
+    var k0 = +t.getAttribute('data-dow');
+    dowSel[k0] = !dowSel[k0];
+    t.setAttribute('aria-pressed', !!dowSel[k0]);
     return;
   }
-
-  if(t.hasAttribute('data-day')){
-    var d = +t.getAttribute('data-day');
-    editMonth(function(arr){
-      var i = arr.indexOf(d);
-      if(i >= 0) arr.splice(i,1); else arr.push(d);
-      return arr;
-    });
+  if(t.hasAttribute('data-wear')){
+    var wid0 = t.getAttribute('data-wear');
+    var off = +t.getAttribute('data-off');
+    var d0 = addDays(today(), -off);
+    var added = toggleDay(wid0, d0);
+    toast((off ? '昨日' : '今日') + '（' + jpDate(ymd(d0)) + '）を' + (added ? '着用として記録しました' : '記録から外しました'));
     return;
   }
-
+  if(t.hasAttribute('data-mv-up') || t.hasAttribute('data-mv-down')){
+    var mid0 = t.getAttribute('data-mv-up') || t.getAttribute('data-mv-down');
+    var dir = t.hasAttribute('data-mv-up') ? -1 : 1;
+    var ord = orderedWatchIds();
+    var ix = ord.indexOf(mid0), jx = ix + dir;
+    if(ix < 0 || jx < 0 || jx >= ord.length) return;
+    ord.splice(jx, 0, ord.splice(ix, 1)[0]);
+    commitOrder(ord); render(); return;
+  }
   if(t.hasAttribute('data-delmaint')){
     var mid = t.getAttribute('data-delmaint');
-    var w2 = clone(state.watches[view.id]);
+    var w2 = clone(state.watches[view.detail]);
     w2.maintenances = (w2.maintenances||[]).filter(function(m){ return m.id !== mid; });
-    putWatch(view.id, w2);
+    putWatch(view.detail, w2);
     toast('記録を削除しました');
     return;
   }
 
   switch(act){
-    case 'add':        watchForm(null); break;
-    case 'back':       view = {name:'list', tab:'overview'}; window.scrollTo(0,0); render(); break;
-    case 'edit':       watchForm(view.id); break;
-    case 'addmaint':   maintForm(view.id); break;
-    case 'cancel':     closeModal(); break;
-    case 'toggleall':  view.showAll = !view.showAll; render(); break;
-    case 'thismonth':  var n0 = today(); cal = {y:n0.getFullYear(), m:n0.getMonth()+1}; render(); break;
-    case 'prevmo':     cal.m--; if(cal.m<1){cal.m=12; cal.y--;} render(); break;
-    case 'nextmo':     cal.m++; if(cal.m>12){cal.m=1; cal.y++;} render(); break;
-    case 'sample':     loadSample(); break;
-    case 'linkfile':   linkFile(); break;
+    case 'add':
+      if(view.page==='wish') wishForm(null);
+      else if(view.page==='shops') shopForm(null);
+      else watchForm(null);
+      break;
+    case 'addshop': shopForm(null); break;
+    case 'addwish': wishForm(null); break;
+    case 'editshop': shopForm(t.getAttribute('data-id')); break;
+    case 'editwish': wishForm(t.getAttribute('data-id')); break;
+    case 'back': view.detail = null; window.scrollTo(0,0); render(); break;
+    case 'edit': watchForm(view.detail); break;
+    case 'addmaint': maintForm(t.getAttribute('data-id') || view.detail); break;
+    case 'svcedit': serviceForm(t.getAttribute('data-id') || view.detail); break;
+    case 'cancel': closeModal(); break;
+    case 'toggleall': view.showAll = !view.showAll; render(); break;
+    case 'thismonth': var n1 = today(); cal = {y:n1.getFullYear(), m:n1.getMonth()+1}; render(); break;
+    case 'prevmo': cal.m--; if(cal.m<1){cal.m=12; cal.y--;} render(); break;
+    case 'nextmo': cal.m++; if(cal.m>12){cal.m=1; cal.y++;} render(); break;
+    case 'sample': loadSample(); break;
+    case 'linkfile': linkFile(); break;
     case 'unlinkfile': unlinkFile(); break;
-    case 'reconnect':  reconnectFile(true); break;
-    case 'export':     exportBackup(); break;
-    case 'import':     $('#impFile').click(); break;
-    case 'pickphoto':  $('#photoFile').click(); break;
+    case 'reconnect': reconnectFile(true); break;
+    case 'export': exportBackup(); break;
+    case 'import': $('#impFile').click(); break;
+    case 'pickphoto': $('#photoFile').click(); break;
+    case 'sortmode': view.sortMode = true; render(); break;
+    case 'sortdone': view.sortMode = false; render(); toast('並び順を保存しました'); break;
+    case 'togglesort': {
+      var c0 = Object.assign({}, state.config,
+        {collectionSort: state.config.collectionSort === 'manual' ? 'due' : 'manual'});
+      putConfig(c0);
+      toast(c0.collectionSort === 'manual' ? '自分で決めた並びで表示します' : '実質の期限が近い順で表示します');
+      break;
+    }
 
     case 'rmphoto': {
       formPhoto = null;
@@ -1466,31 +2131,24 @@ document.addEventListener('click', function(e){
     case 'bulkall': {
       var lastD = lastEditableDay();
       if(!lastD){ toast('未来の月には登録できません。'); break; }
-      editMonth(function(){
-        var a = []; for(var i=1;i<=lastD;i++) a.push(i); return a;
-      });
+      editMonth(function(){ var a=[]; for(var i=1;i<=lastD;i++) a.push(i); return a; });
       toast(cal.m + ' 月の 1〜' + lastD + ' 日を着用として登録しました');
       break;
     }
-    case 'bulkclear':
-      editMonth(function(){ return []; });
-      toast(cal.m + ' 月の記録を消しました');
-      break;
+    case 'bulkclear': editMonth(function(){ return []; }); toast(cal.m + ' 月の記録を消しました'); break;
     case 'bulkdow': {
       var picked = Object.keys(dowSel).filter(function(k){ return dowSel[k]; }).map(Number);
       if(!picked.length){ toast('先に曜日を選んでください。'); break; }
       var lim = lastEditableDay();
       if(!lim){ toast('未来の月には登録できません。'); break; }
-      var added = 0;
+      var added2 = 0;
       editMonth(function(arr){
         for(var i=1;i<=lim;i++){
-          if(picked.indexOf(new Date(cal.y, cal.m-1, i).getDay()) >= 0 && arr.indexOf(i) < 0){
-            arr.push(i); added++;
-          }
+          if(picked.indexOf(new Date(cal.y, cal.m-1, i).getDay()) >= 0 && arr.indexOf(i) < 0){ arr.push(i); added2++; }
         }
         return arr;
       });
-      toast(picked.map(function(k){ return DOW[k]; }).join('・') + ' 曜日を ' + added + ' 日追加しました');
+      toast(picked.map(function(k){ return DOW[k]; }).join('・') + ' 曜日を ' + added2 + ' 日追加しました');
       break;
     }
 
@@ -1499,28 +2157,33 @@ document.addEventListener('click', function(e){
       var model = $('#f_model').value.trim();
       if(!model){ $('#f_err').textContent = '購入モデル名を入力してください。'; $('#f_model').focus(); return; }
       var prev = id2 ? state.watches[id2] : null;
-      var cond = $('#f_cond').querySelector('[aria-pressed="true"]');
-      var mvb  = $('#f_mv').querySelector('[aria-pressed="true"]');
+      function segv(sel, dflt){ var b = $(sel).querySelector('[aria-pressed="true"]'); return b ? b.getAttribute('data-seg') : dflt; }
       var w3 = {
         model: model,
         maker: $('#f_maker').value.trim(),
-        movement: mvb ? mvb.getAttribute('data-mv') : '機械式',
+        movement: segv('#f_mv','機械式'),
+        winding: segv('#f_wind','自動巻き'),
+        complication: segv('#f_comp','三針'),
         modelYear: $('#f_year').value ? +$('#f_year').value : null,
         purchaseDate: $('#f_pdate').value || '',
         price: $('#f_price').value !== '' ? +$('#f_price').value : null,
+        condition: segv('#f_cond','新品'),
         shop: $('#f_shop').value.trim(),
-        condition: cond ? cond.getAttribute('data-cond') : '新品',
+        shopId: $('#f_shopId').value || '',
         maintenances: prev ? (prev.maintenances||[]) : [],
+        service: prev ? (prev.service||null) : null,
+        order: prev && prev.order != null ? prev.order : Object.keys(state.watches).length,
         createdAt: prev ? prev.createdAt : new Date().toISOString()
       };
-      var newId = id2 || uid();
+      if(w3.shopId && state.shops[w3.shopId] && state.shops[w3.shopId].name !== w3.shop) w3.shopId = '';
+      var newId = id2 || uid('w');
       var photo = formPhoto;
       var hadUrl = (state.photos[newId] && state.photos[newId].dataUrl) || null;
       putWatch(newId, w3);
       if(photo){ if(photo !== hadUrl) putPhoto(newId, photo); }
       else if(hadUrl) putPhoto(newId, null);
       closeModal();
-      if(!id2){ view = {name:'detail', id:newId, tab:'overview', showAll:false}; cal=null; render(); }
+      if(!id2){ view.page='collection'; view.detail = newId; view.tab='overview'; cal=null; render(); }
       toast(id2 ? '保存しました' : '「' + model + '」を追加しました');
       break;
     }
@@ -1532,32 +2195,154 @@ document.addEventListener('click', function(e){
       var ohBox = $('#m_oh');
       var isOh = !isQuartz(state.watches[wid]) && !!(ohBox && ohBox.checked);
       var w4 = clone(state.watches[wid]);
+      var sName = $('#m_shop').value.trim(), sId = $('#m_shopId').value || '';
+      if(sId && state.shops[sId] && state.shops[sId].name !== sName) sId = '';
       w4.maintenances = (w4.maintenances||[]).concat([{
         id: 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
-        date: date,
-        type: isOh ? 'overhaul' : 'repair',
+        date: date, type: isOh ? 'overhaul' : 'repair',
         cost: $('#m_cost').value !== '' ? +$('#m_cost').value : null,
-        shop: $('#m_shop').value.trim(),
+        shop: sName, shopId: sId,
         content: $('#m_content').value.trim()
       }]);
+      if(t.getAttribute('data-fromsvc')) w4.service = null;
       putWatch(wid, w4);
       closeModal();
       toast(isOh ? 'オーバーホールを記録し、起算日を更新しました。' : '記録しました。起算日は変わりません。');
       break;
     }
 
+    case 'savesvc': {
+      var sid2 = t.getAttribute('data-id');
+      var w5 = clone(state.watches[sid2]);
+      var vName = $('#v_shop').value.trim(), vId = $('#v_shopId').value || '';
+      if(vId && state.shops[vId] && state.shops[vId].name !== vName) vId = '';
+      var retB = $('#v_ret').querySelector('[aria-pressed="true"]');
+      w5.service = {
+        sentDate: $('#v_sent').value || ymd(today()),
+        status: $('#v_status').value,
+        nextActionDate: $('#v_next').value || '',
+        nextActionLabel: $('#v_nextlb').value.trim(),
+        shop: vName, shopId: vId,
+        person: $('#v_person').value.trim(),
+        tel: $('#v_tel').value.trim(),
+        returnMethod: retB ? retB.getAttribute('data-seg') : '引き取り',
+        memo: $('#v_memo').value.trim()
+      };
+      putWatch(sid2, w5);
+      closeModal();
+      toast('メンテナンスの状況を保存しました');
+      break;
+    }
+    case 'svccancel': {
+      var cid = t.getAttribute('data-id');
+      var w6 = clone(state.watches[cid]); w6.service = null;
+      putWatch(cid, w6); closeModal();
+      toast('メンテ中の表示を取り消しました');
+      break;
+    }
+    case 'svcdone': {
+      var did2 = t.getAttribute('data-id') || view.detail;
+      var sv = state.watches[did2].service || {};
+      maintForm(did2, { date: ymd(today()), shop: sv.shop || (shopById(sv.shopId)||{}).name || '',
+        shopId: sv.shopId || '', content: sv.memo || '', fromService: true });
+      break;
+    }
+
+    case 'saveshop': {
+      var shid = t.getAttribute('data-id') || '';
+      var nm2 = $('#s_name').value.trim();
+      if(!nm2){ $('#s_err').textContent = '店名を入力してください。'; $('#s_name').focus(); return; }
+      var prevS = shid ? state.shops[shid] : null;
+      put('shops', shid || uid('s'), {
+        name: nm2,
+        person: $('#s_person').value.trim(),
+        tel: $('#s_tel').value.trim(),
+        address: $('#s_addr').value.trim(),
+        url: $('#s_url').value.trim(),
+        searchUrl: $('#s_surl').value.trim(),
+        memo: $('#s_memo').value.trim(),
+        order: prevS && prevS.order != null ? prevS.order : Object.keys(state.shops).length,
+        createdAt: prevS ? prevS.createdAt : new Date().toISOString()
+      });
+      closeModal();
+      toast(shid ? '保存しました' : '「' + nm2 + '」を追加しました');
+      break;
+    }
+    case 'delshop': {
+      if(t.getAttribute('data-confirm') !== '1'){
+        t.setAttribute('data-confirm','1'); t.textContent = '本当に削除しますか？'; return;
+      }
+      removeShop(t.getAttribute('data-id')); closeModal(); toast('店を削除しました');
+      break;
+    }
+
+    case 'savewish': {
+      var kid = t.getAttribute('data-id') || '';
+      var km = $('#k_model').value.trim();
+      if(!km){ $('#k_err').textContent = 'モデル名を入力してください。'; $('#k_model').focus(); return; }
+      var prevK = kid ? state.wishes[kid] : null;
+      var prioB = $('#k_prio').querySelector('[aria-pressed="true"]');
+      var prioTxt = prioB ? prioB.getAttribute('data-seg') : '中';
+      var condB = $('#k_cond').querySelector('[aria-pressed="true"]');
+      var picks = [].slice.call($('#k_shops').querySelectorAll('input:checked')).map(function(i){ return i.value; });
+      var newKid = kid || uid('k');
+      var kPhoto = formPhoto;
+      var kHad = (state.photos[newKid] && state.photos[newKid].dataUrl) || null;
+      put('wishes', newKid, {
+        model: km,
+        maker: $('#k_maker').value.trim(),
+        ref: $('#k_ref').value.trim(),
+        condPref: condB ? condB.getAttribute('data-seg') : 'どちらでも',
+        targetPrice: $('#k_target').value !== '' ? +$('#k_target').value : null,
+        listPrice: $('#k_list').value !== '' ? +$('#k_list').value : null,
+        budget: $('#k_budget').value !== '' ? +$('#k_budget').value : null,
+        priority: prioTxt === '高' ? 1 : prioTxt === '低' ? 3 : 2,
+        shopIds: picks,
+        memo: $('#k_memo').value.trim(),
+        lastChecked: prevK ? (prevK.lastChecked||'') : '',
+        order: prevK && prevK.order != null ? prevK.order : Object.keys(state.wishes).length,
+        createdAt: prevK ? prevK.createdAt : new Date().toISOString()
+      });
+      if(kPhoto){ if(kPhoto !== kHad) putPhoto(newKid, kPhoto); }
+      else if(kHad) putPhoto(newKid, null);
+      closeModal();
+      view.page = 'wish'; render();
+      toast(kid ? '保存しました' : '「' + km + '」を検討リストに追加しました');
+      break;
+    }
+    case 'delwish': {
+      if(t.getAttribute('data-confirm') !== '1'){
+        t.setAttribute('data-confirm','1'); t.textContent = '本当に削除しますか？'; return;
+      }
+      removeWish(t.getAttribute('data-id')); closeModal(); toast('検討リストから削除しました');
+      break;
+    }
+
+    case 'patrol': {
+      patrol = {wishId: t.getAttribute('data-id'), done:{}};
+      patrolSheet();
+      break;
+    }
+    case 'patroldone': {
+      var pid = t.getAttribute('data-id');
+      var kk = clone(state.wishes[pid]);
+      kk.lastChecked = ymd(today());
+      put('wishes', pid, kk);
+      closeModal();
+      toast('今日チェックしたと記録しました');
+      break;
+    }
+
     case 'savecfg': {
-      var yrs = +$('#s_years').value || 4;
+      var yrs = Math.max(1, Math.min(20, +$('#s_years').value || 4));
       var mx  = +$('#s_max').value || 8;
       var cy  = $('#s_carry').value === '' ? 2 : +$('#s_carry').value;
-      yrs = Math.max(1, Math.min(20, yrs));
-      putConfig({
+      putConfig(Object.assign({}, state.config, {
         intervalYears: yrs,
         maxYears: Math.max(yrs, Math.min(30, mx)),
         carryDays: Math.max(0, Math.min(10, cy))
-      });
-      closeModal();
-      toast('設定を保存しました');
+      }));
+      closeModal(); toast('設定を保存しました');
       break;
     }
 
@@ -1565,14 +2350,9 @@ document.addEventListener('click', function(e){
       var did = t.getAttribute('data-id');
       var nm = state.watches[did] ? state.watches[did].model : '';
       if(t.getAttribute('data-confirm') !== '1'){
-        t.setAttribute('data-confirm','1');
-        t.textContent = '本当に削除しますか？';
-        return;
+        t.setAttribute('data-confirm','1'); t.textContent = '本当に削除しますか？'; return;
       }
-      removeWatch(did);
-      closeModal();
-      view = {name:'list', tab:'overview'};
-      render();
+      removeWatch(did); closeModal(); view.detail = null; render();
       toast('「' + nm + '」を削除しました');
       break;
     }
@@ -1580,33 +2360,55 @@ document.addEventListener('click', function(e){
 });
 
 document.addEventListener('input', function(e){
-  if(e.target.id === 'f_maker') comboOpen(true, e.target.value);
+  var box = e.target.closest && e.target.closest('.combo');
+  if(!box) return;
+  comboOpen(box, true, e.target.value);
+  var hid = e.target.id === 'f_shop' ? '#f_shopId'
+    : e.target.id === 'm_shop' ? '#m_shopId'
+    : e.target.id === 'v_shop' ? '#v_shopId' : '';
+  if(hid && $(hid)) $(hid).value = '';
 });
 document.addEventListener('keydown', function(e){
   if(e.key !== 'Escape') return;
-  var list = $('#makerList');
-  if(list && !list.hidden){ list.hidden = true; return; }
+  if(document.querySelector('.combo-list:not([hidden])')){ closeCombos(); return; }
   if($('#veil')) closeModal();
 });
-$('#btnAdd').addEventListener('click', function(){ watchForm(null); });
+$('#btnAdd').addEventListener('click', function(){
+  if(view.page==='wish') wishForm(null);
+  else if(view.page==='shops') shopForm(null);
+  else watchForm(null);
+});
 $('#btnSettings').addEventListener('click', settingsForm);
 
 /* ============ sample data ============ */
 function loadSample(){
   var n = today();
-  function back(months, day){ return ymd(new Date(n.getFullYear(), n.getMonth() - months, day)); }
-  var a = uid(), b = uid(), c = uid();
-  putWatch(a, { model:'サンプル：Datejust 36', maker:'ROLEX', movement:'機械式', modelYear:2016,
-    purchaseDate: back(46, 12), price:980000, shop:'サンプル：正規店', condition:'中古',
-    maintenances:[], createdAt:new Date().toISOString() });
-  putWatch(b, { model:'サンプル：Speedmaster Pro', maker:'OMEGA', movement:'機械式', modelYear:2019,
-    purchaseDate: back(70, 3), price:640000, shop:'サンプル：百貨店', condition:'新品',
-    maintenances:[{id:'ms1', date: back(20, 8), type:'overhaul', cost:88000, shop:'サンプル：サービスセンター', content:'オーバーホール一式'},
-                  {id:'ms2', date: back(6, 14), type:'repair', cost:9800, shop:'サンプル：時計店', content:'ベルト交換'}],
-    createdAt:new Date().toISOString() });
-  putWatch(c, { model:'サンプル：Eco-Drive', maker:'CITIZEN', movement:'クオーツ', modelYear:2022,
-    purchaseDate: back(30, 5), price:52000, shop:'サンプル：量販店', condition:'新品',
-    maintenances:[], createdAt:new Date().toISOString() });
+  function back(months, day){ return ymd(new Date(n.getFullYear(), n.getMonth()-months, day)); }
+  var s1 = uid('s'), s2 = uid('s');
+  put('shops', s1, {name:'サンプル：正規店 銀座', person:'田中', tel:'03-1234-5678',
+    address:'東京都中央区銀座1-1-1', url:'example.com', searchUrl:'example.com/search?q={q}',
+    memo:'サンプルの店です', order:0, createdAt:new Date().toISOString()});
+  put('shops', s2, {name:'サンプル：中古時計専門店', person:'鈴木', tel:'06-9876-5432',
+    address:'大阪市北区…', url:'example.org', searchUrl:'', memo:'', order:1, createdAt:new Date().toISOString()});
+
+  var a = uid('w'), b = uid('w'), c = uid('w');
+  put('watches', a, { model:'サンプル：Datejust 36', maker:'ROLEX', movement:'機械式',
+    winding:'自動巻き', complication:'三針', modelYear:2016, purchaseDate:back(46,12),
+    price:980000, shop:'サンプル：正規店 銀座', shopId:s1, condition:'中古',
+    maintenances:[], service:null, order:0, createdAt:new Date().toISOString() });
+  put('watches', b, { model:'サンプル：Speedmaster Pro', maker:'OMEGA', movement:'機械式',
+    winding:'手巻き', complication:'クロノグラフ', modelYear:2019, purchaseDate:back(70,3),
+    price:640000, shop:'サンプル：正規店 銀座', shopId:s1, condition:'新品',
+    maintenances:[{id:'ms1', date:back(20,8), type:'overhaul', cost:88000, shop:'サンプル：正規店 銀座', shopId:s1, content:'オーバーホール一式'},
+                  {id:'ms2', date:back(6,14), type:'repair', cost:9800, shop:'', shopId:'', content:'ベルト交換'}],
+    service:{ sentDate:back(0,12), status:'完成待ち', nextActionDate:ymd(addDays(n,13)),
+      nextActionLabel:'仕上がり', shop:'サンプル：正規店 銀座', shopId:s1, person:'田中',
+      tel:'03-1234-5678', returnMethod:'郵送', memo:'見積もり 88,000円で承認済' },
+    order:1, createdAt:new Date().toISOString() });
+  put('watches', c, { model:'サンプル：Eco-Drive', maker:'CITIZEN', movement:'クオーツ',
+    winding:'', complication:'', modelYear:2022, purchaseDate:back(30,5),
+    price:52000, shop:'', shopId:'', condition:'新品',
+    maintenances:[], service:null, order:2, createdAt:new Date().toISOString() });
 
   function pattern(step){
     var months = {};
@@ -1620,23 +2422,26 @@ function loadSample(){
   }
   putUsage(a, pattern(6));
   putUsage(b, pattern(3));
-  toast('サンプル 3 本を読み込みました。不要になったら「情報を編集」から削除できます。');
+
+  put('wishes', uid('k'), { model:'サンプル：Explorer 1 124270', maker:'ROLEX', ref:'124270',
+    condPref:'どちらでも', targetPrice:1050000, listPrice:960000, budget:1200000, priority:1,
+    shopIds:[s1,s2], memo:'相場が落ち着いたら', lastChecked:'', order:0, createdAt:new Date().toISOString() });
+
+  toast('サンプルを読み込みました。不要になったら各項目の編集画面から削除できます。');
 }
 
 /* ============ boot & sync ============ */
 function badge(txt, title){ var el = $('#modeBadge'); el.textContent = txt; el.title = title || ''; }
 function onDbErr(e){ if(e && e.code === 'revoked') return; toast('同期エラー（' + (e && e.code || '不明') + '）'); }
+function subColl(name){
+  DB.collection(name).onSnapshot(function(s){
+    var o = {}; s.docs.forEach(function(d){ o[d.id] = d.data(); });
+    state[name] = o; render();
+  }, onDbErr);
+}
 function subscribe(){
   try{
-    DB.collection('watches').onSnapshot(function(s){
-      var o = {}; s.docs.forEach(function(d){ o[d.id] = d.data(); }); state.watches = o; render();
-    }, onDbErr);
-    DB.collection('usage').onSnapshot(function(s){
-      var o = {}; s.docs.forEach(function(d){ o[d.id] = d.data(); }); state.usage = o; render();
-    }, onDbErr);
-    DB.collection('photos').onSnapshot(function(s){
-      var o = {}; s.docs.forEach(function(d){ o[d.id] = d.data(); }); state.photos = o; render();
-    }, onDbErr);
+    ['watches','usage','photos','shops','wishes'].forEach(subColl);
     DB.doc('config/app').onSnapshot(function(s){
       if(s.exists) state.config = Object.assign({}, DEFAULT_CFG, s.data());
       render();
