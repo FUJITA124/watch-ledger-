@@ -2066,6 +2066,16 @@ document.addEventListener('click', function(e){
     toast((off ? '昨日' : '今日') + '（' + jpDate(ymd(d0)) + '）を' + (added ? '着用として記録しました' : '記録から外しました'));
     return;
   }
+  /* カレンダーの日付を直接タップして登録・取り消し */
+  if(t.hasAttribute('data-day')){
+    var dnum = +t.getAttribute('data-day');
+    editMonth(function(arr){
+      var ix = arr.indexOf(dnum);
+      if(ix >= 0) arr.splice(ix, 1); else arr.push(dnum);
+      return arr;
+    });
+    return;
+  }
   if(t.hasAttribute('data-mv-up') || t.hasAttribute('data-mv-down')){
     var mid0 = t.getAttribute('data-mv-up') || t.getAttribute('data-mv-down');
     var dir = t.hasAttribute('data-mv-up') ? -1 : 1;
