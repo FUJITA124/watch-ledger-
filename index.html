@@ -372,6 +372,22 @@ tfoot td{font-weight:600; background:var(--surface-2); font-family:var(--f-mono)
 .shoprow .dt a{color:var(--cal); text-decoration:none; word-break:break-all}
 .shoprow .dt .lbx{color:var(--ink-3); font-size:10px; letter-spacing:.1em; margin-right:5px; font-family:var(--f-display); text-transform:uppercase}
 .shoprow .acts{display:flex; flex-direction:column; gap:6px; flex:none}
+.wlink{display:inline-flex; align-items:baseline; gap:6px; font-size:12px; padding:2px 9px;
+  margin:2px 5px 2px 0; border-radius:99px; border:1px solid var(--line-2);
+  background:var(--surface-2); color:var(--ink); font-family:var(--f-body); line-height:1.5}
+.wlink:hover{border-color:var(--ink-3)}
+.wlink .wdate{font-family:var(--f-mono); font-size:10.5px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.bmanual{margin-top:3px; color:var(--ink-2); white-space:pre-wrap}
+/* 名刺：高さを揃え幅は写真なり。横長は大きく、縦長は細く収まる */
+.sside{display:flex; gap:11px; align-items:center; flex:none}
+.meishi{display:block; height:64px; width:auto; max-width:124px; border-radius:3px;
+  object-fit:contain; border:1px solid var(--line-2); background:var(--surface-2); cursor:zoom-in}
+.meishi-add{height:64px; width:90px; padding:0; border-radius:3px; border:1px dashed var(--line-2);
+  background:var(--surface-2); color:var(--ink-3); font-size:10.5px; line-height:1.4;
+  display:grid; place-items:center; text-align:center}
+.meishi-add:hover{border-color:var(--ink-3); color:var(--ink-2)}
+.lightbox{width:100%; max-height:70vh; object-fit:contain; border-radius:4px;
+  background:var(--surface-2); border:1px solid var(--line)}
 .wprice{display:flex; gap:14px; flex-wrap:wrap; margin-top:8px}
 .wprice > div .k{font-size:9.5px; letter-spacing:.14em; color:var(--ink-3); text-transform:uppercase; font-family:var(--f-display)}
 .wprice > div .v{font-family:var(--f-mono); font-size:15px; font-weight:500; font-variant-numeric:tabular-nums}
@@ -499,8 +515,10 @@ footer{margin-top:32px; padding-top:16px; border-top:1px solid var(--line); font
   .legend{gap:9px; font-size:11px}
 
   .shoprow{flex-direction:column}
-  .shoprow .acts{flex-direction:row; width:100%}
+  .shoprow .sside{width:100%}
+  .shoprow .acts{flex-direction:row; flex:1}
   .shoprow .acts .btn{flex:1}
+  .meishi, .meishi-add{height:58px}
 
   .modal{padding:18px}
   .modal-acts{gap:8px}
@@ -571,6 +589,7 @@ function diffDays(a,b){ return Math.round((b-a)/86400000); }
 function daysInMonth(y,m){ return new Date(y, m, 0).getDate(); }
 function mkey(y,m){ return y+'-'+pad(m); }
 function jpDate(s){ if(!s) return '—'; var d=parseYMD(s); return d.getFullYear()+'.'+pad(d.getMonth()+1)+'.'+pad(d.getDate()); }
+function ymShort(s){ if(!s) return ''; var d=parseYMD(s); return d.getFullYear()+'.'+pad(d.getMonth()+1); }
 function yen(n){ if(n==null||n==='') return '—'; return '¥'+Number(n).toLocaleString('ja-JP'); }
 function uid(p){ return (p||'w')+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function serial(d){ return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())/86400000); }
@@ -830,7 +849,7 @@ function removeWatch(id){
 }
 function removeWish(id){ del('wishes', id); del('photos', id); if(mode!=='db') saveLocal(); render(); }
 function removeShop(id){
-  del('shops', id);
+  del('shops', id); del('photos', id);
   /* detach the shop from anything that pointed at it, keeping the typed name */
   Object.keys(state.watches).forEach(function(wid){
     var w = state.watches[wid], changed = false;
@@ -1253,7 +1272,9 @@ function detailHTML(id, cfg){
   var sc = schedule(w, u, cfg);
   var st = statusOf(w, sc);
 
-  var h = '<button class="back" data-act="back">← コレクションへ戻る</button>';
+  var h = '<button class="back" data-act="back">← '
+    + (view.page === 'shops' ? '利用店' : view.page === 'wish' ? '検討リスト' : 'コレクション')
+    + 'へ戻る</button>';
   h += '<div class="hero ' + st.cls + '">';
 
   if(!sc){
@@ -1550,11 +1571,28 @@ function shopPageHTML(){
   ids.forEach(function(id){
     var s = state.shops[id];
     var u = safeUrl(s.url), th = telHref(s.tel);
-    var used = Object.keys(state.watches).filter(function(w){
+    /* この店で買った時計（新しい順）と、メンテだけで使っている本数 */
+    var boughtIds = Object.keys(state.watches)
+      .filter(function(w){ return state.watches[w].shopId === id; })
+      .sort(function(a,b){ return (state.watches[b].purchaseDate||'').localeCompare(state.watches[a].purchaseDate||''); });
+    var servicedN = Object.keys(state.watches).filter(function(w){
       var x = state.watches[w];
-      return x.shopId === id || (x.service && x.service.shopId === id)
+      if(x.shopId === id) return false;
+      return (x.service && x.service.shopId === id)
         || (x.maintenances||[]).some(function(m){ return m.shopId === id; });
     }).length;
+    var buyLine = '';
+    if(boughtIds.length || s.bought){
+      buyLine = '<div><span class="lbx">購入</span>'
+        + boughtIds.map(function(w){
+            var x = state.watches[w];
+            return '<button class="wlink" data-open="' + esc(w) + '">' + esc(x.model)
+              + (x.purchaseDate ? '<span class="wdate">' + esc(ymShort(x.purchaseDate)) + '</span>' : '')
+              + '</button>';
+          }).join('')
+        + (s.bought ? '<div class="bmanual">' + esc(s.bought) + '</div>' : '')
+        + '</div>';
+    }
     h += '<div class="shoprow"><div style="min-width:0;flex:1">'
       + '<div class="nm">' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(s.name) + ' ↗</a>' : esc(s.name)) + '</div>'
       + '<div class="dt">'
@@ -1563,12 +1601,18 @@ function shopPageHTML(){
       + (s.address ? '<div><span class="lbx">住所</span>' + esc(s.address) + '</div>' : '')
       + (s.searchUrl ? '<div><span class="lbx">検索</span><span style="color:var(--ink-3)">巡回用URL 登録済</span></div>' : '')
       + (s.memo ? '<div style="color:var(--ink-3)">' + esc(s.memo) + '</div>' : '')
-      + (used ? '<div style="color:var(--ink-3)">' + used + ' 本で利用中</div>' : '')
+      + buyLine
+      + (servicedN ? '<div style="color:var(--ink-3)">メンテナンスで ' + servicedN + ' 本利用</div>' : '')
       + '</div></div>'
+      + '<div class="sside">'
+      + (state.photos[id] && state.photos[id].dataUrl
+        ? '<img class="meishi" src="' + state.photos[id].dataUrl + '" alt="'
+          + esc(s.name) + ' の名刺" data-act="viewcard" data-id="' + esc(id) + '">'
+        : '<button class="meishi-add" data-act="editshop" data-id="' + esc(id) + '">名刺を<br>登録</button>')
       + '<div class="acts">'
       + (u ? '<a class="btn btn-sm" href="' + esc(u) + '" target="_blank" rel="noopener">サイトを開く</a>' : '')
       + '<button class="btn btn-sm" data-act="editshop" data-id="' + esc(id) + '">編集</button>'
-      + '</div></div>';
+      + '</div></div></div>';
   });
   return h + '</div>';
 }
@@ -1702,14 +1746,15 @@ function closeModal(){ $('#modalRoot').innerHTML = ''; formPhoto = null; photoTa
 function openModal(html){
   $('#modalRoot').innerHTML = '<div class="veil" id="veil"><div class="modal" role="dialog" aria-modal="true">' + html + '</div></div>';
 }
-function photoField(cur){
-  return '<div class="full"><span class="lb">写真</span><div class="photo-pick">'
+function photoField(cur, label, hint){
+  return '<div class="full"><span class="lb">' + esc(label || '写真') + '</span><div class="photo-pick">'
     + (cur ? '<img id="photoPreview" class="pv" src="' + cur + '" alt="登録した写真">'
-      : '<span id="photoPreview" class="pv ph" aria-hidden="true">⌚</span>')
+      : '<span id="photoPreview" class="pv ph" aria-hidden="true">' + (label ? '🪪' : '⌚') + '</span>')
     + '<div><div class="acts">'
     + '<button type="button" class="btn btn-sm" data-act="pickphoto">画像を選ぶ</button>'
     + '<button type="button" class="btn btn-sm btn-danger" id="photoRemove" data-act="rmphoto"' + (cur?'':' hidden') + '>削除</button>'
-    + '</div><div style="font-size:11.5px;color:var(--ink-3);margin-top:6px">スマホなら撮影・写真アプリから選べます</div>'
+    + '</div><div style="font-size:11.5px;color:var(--ink-3);margin-top:6px">'
+    + esc(hint || 'スマホなら撮影・写真アプリから選べます') + '</div>'
     + '</div></div></div>';
 }
 function segField(id, label, opts, cur, hint){
@@ -1740,7 +1785,16 @@ function watchForm(id){
     + '<label><span class="lb">購入時期</span><input id="f_pdate" type="date" value="' + esc(w.purchaseDate||'') + '"></label>'
     + '<label><span class="lb">購入金額（円）</span><input id="f_price" type="number" min="0" step="1000" value="' + esc(w.price==null?'':w.price) + '" placeholder="580000"></label>'
     + segField('f_cond', '状態', ['新品','中古'], w.condition || '新品')
-    + comboField('f_shop', shopName(w), '例：正規店 銀座', 'shop', '購入店（登録した店から選べます）')
+    + comboField('f_shop', shopName(w), '例：正規店 銀座', 'shop', '購入店（手入力できます）')
+    + '<div class="full"><span class="lb">登録した店から選ぶ</span><div class="pickgrid" id="f_shoppick">'
+    + (sortedShops().length
+      ? sortedShops().map(function(sid){
+          return '<label><input type="checkbox" value="' + esc(sid) + '"'
+            + (w.shopId === sid ? ' checked' : '') + '>' + esc(state.shops[sid].name) + '</label>';
+        }).join('')
+      : '<div class="none2">「利用店」で店を登録すると、ここから選べます。</div>')
+    + '</div><div style="font-size:11.5px;color:var(--ink-3);margin-top:6px">'
+    + 'チェックすると上の欄に店名が入り、店の情報と紐づきます。チェックを外せば手入力のままになります。</div></div>'
     + '</div><input type="hidden" id="f_shopId" value="' + esc(w.shopId||'') + '">'
     + '<div class="err" id="f_err"></div>'
     + '<div class="modal-acts">'
@@ -1805,9 +1859,12 @@ function serviceForm(id){
 
 function shopForm(id){
   var s = id ? state.shops[id] : {};
+  var cardCur = (id && state.photos[id]) ? state.photos[id].dataUrl : null;
+  formPhoto = cardCur || null; photoTarget = 'shop';
   var h = '<h3>' + (id ? '店の情報' : '利用店を追加') + '</h3>'
     + '<div class="sub">登録しておくと、時計やメンテ記録から選べて、名前をタップでサイトが開きます。</div>'
     + '<div class="fields">'
+    + photoField(cardCur, '担当者の名刺', '横長・縦長どちらでも構いません。一覧ではタップで拡大できます。')
     + '<label class="full"><span class="lb">店名</span><input id="s_name" value="' + esc(s.name||'') + '" placeholder="例：〇〇時計店 銀座本店"></label>'
     + '<label><span class="lb">担当者</span><input id="s_person" value="' + esc(s.person||'') + '" placeholder="田中"></label>'
     + '<label><span class="lb">電話</span><input id="s_tel" value="' + esc(s.tel||'') + '" placeholder="03-1234-5678"></label>'
@@ -1817,6 +1874,10 @@ function shopForm(id){
     + '<div class="full" style="font-size:11.5px;color:var(--ink-3);margin-top:-6px">'
     + '検討リストの巡回で開くページです。空ならホームページを開きます。'
     + 'URLに <b>{q}</b> を入れておくと、そこにモデル名が入ります。</div>'
+    + '<label class="full"><span class="lb">この店で購入したもの（手入力）</span>'
+    + '<textarea id="s_bought" placeholder="登録していない時計や、補足があれば">' + esc(s.bought||'') + '</textarea></label>'
+    + '<div class="full" style="font-size:11.5px;color:var(--ink-3);margin-top:-6px">'
+    + 'コレクションで購入店にこの店を選んだ時計は、一覧に自動で並びます。ここはそれ以外を書く欄です。</div>'
     + '<label class="full"><span class="lb">メモ</span><textarea id="s_memo" placeholder="営業時間、得意分野など">' + esc(s.memo||'') + '</textarea></label>'
     + '</div><div class="err" id="s_err"></div>'
     + '<div class="modal-acts">'
@@ -2037,6 +2098,7 @@ document.addEventListener('click', function(e){
     inp.value = sh.name;
     var hid = inp.id === 'f_shop' ? '#f_shopId' : inp.id === 'm_shop' ? '#m_shopId' : '#v_shopId';
     if($(hid)) $(hid).value = sid;
+    if(inp.id === 'f_shop') syncShopPick(sid);
     if(inp.id === 'v_shop'){
       if($('#v_person') && !$('#v_person').value) $('#v_person').value = sh.person || '';
       if($('#v_tel') && !$('#v_tel').value) $('#v_tel').value = sh.tel || '';
@@ -2133,8 +2195,22 @@ document.addEventListener('click', function(e){
     case 'rmphoto': {
       formPhoto = null;
       var pv = $('#photoPreview');
-      if(pv) pv.outerHTML = '<span id="photoPreview" class="pv ph" aria-hidden="true">⌚</span>';
+      if(pv) pv.outerHTML = '<span id="photoPreview" class="pv ph" aria-hidden="true">'
+        + (photoTarget === 'shop' ? '🪪' : '⌚') + '</span>';
       t.hidden = true;
+      break;
+    }
+
+    case 'viewcard': {
+      var cid2 = t.getAttribute('data-id');
+      var shop = state.shops[cid2], pic = state.photos[cid2];
+      if(!shop || !pic || !pic.dataUrl) break;
+      openModal('<h3>' + esc(shop.name) + '</h3>'
+        + '<div class="sub">' + esc(shop.person ? '担当 ' + shop.person : '名刺') + '</div>'
+        + '<img class="lightbox" src="' + pic.dataUrl + '" alt="' + esc(shop.name) + ' の名刺">'
+        + '<div class="modal-acts">'
+        + '<button class="btn" data-act="editshop" data-id="' + esc(cid2) + '">店の情報を編集</button>'
+        + '<button class="btn btn-primary" data-act="cancel">閉じる</button></div>');
       break;
     }
 
@@ -2263,17 +2339,23 @@ document.addEventListener('click', function(e){
       var nm2 = $('#s_name').value.trim();
       if(!nm2){ $('#s_err').textContent = '店名を入力してください。'; $('#s_name').focus(); return; }
       var prevS = shid ? state.shops[shid] : null;
-      put('shops', shid || uid('s'), {
+      var newSid = shid || uid('s');
+      var cardNew = formPhoto;
+      var cardHad = (state.photos[newSid] && state.photos[newSid].dataUrl) || null;
+      put('shops', newSid, {
         name: nm2,
         person: $('#s_person').value.trim(),
         tel: $('#s_tel').value.trim(),
         address: $('#s_addr').value.trim(),
         url: $('#s_url').value.trim(),
         searchUrl: $('#s_surl').value.trim(),
+        bought: $('#s_bought').value.trim(),
         memo: $('#s_memo').value.trim(),
         order: prevS && prevS.order != null ? prevS.order : Object.keys(state.shops).length,
         createdAt: prevS ? prevS.createdAt : new Date().toISOString()
       });
+      if(cardNew){ if(cardNew !== cardHad) putPhoto(newSid, cardNew); }
+      else if(cardHad) putPhoto(newSid, null);
       closeModal();
       toast(shid ? '保存しました' : '「' + nm2 + '」を追加しました');
       break;
@@ -2369,6 +2451,10 @@ document.addEventListener('click', function(e){
   }
 });
 
+function syncShopPick(sid){
+  var pg = $('#f_shoppick'); if(!pg) return;
+  [].forEach.call(pg.querySelectorAll('input[type="checkbox"]'), function(b){ b.checked = b.value === sid; });
+}
 document.addEventListener('input', function(e){
   var box = e.target.closest && e.target.closest('.combo');
   if(!box) return;
@@ -2377,6 +2463,20 @@ document.addEventListener('input', function(e){
     : e.target.id === 'm_shop' ? '#m_shopId'
     : e.target.id === 'v_shop' ? '#v_shopId' : '';
   if(hid && $(hid)) $(hid).value = '';
+  /* 手入力に切り替わったらチェックも外す */
+  if(e.target.id === 'f_shop') syncShopPick('');
+});
+/* 購入店のチェックは 1 件だけ。外せば手入力に戻る */
+document.addEventListener('change', function(e){
+  var pg = e.target.closest && e.target.closest('#f_shoppick');
+  if(!pg || e.target.type !== 'checkbox') return;
+  if(e.target.checked){
+    var sh = state.shops[e.target.value];
+    syncShopPick(e.target.value);
+    if(sh){ $('#f_shop').value = sh.name; $('#f_shopId').value = e.target.value; }
+  }else{
+    $('#f_shopId').value = '';
+  }
 });
 document.addEventListener('keydown', function(e){
   if(e.key !== 'Escape') return;
