@@ -6,11 +6,10 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#E6E3DB" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F1114" media="(prefers-color-scheme: dark)">
-<meta name="description" content="腕時計の購入情報・着用記録・メンテナンス履歴・検討リストを管理します。">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="時計台帳">
+<meta name="apple-mobile-web-app-title" content="時計台帳"><meta name="description" content="腕時計の購入情報・着用記録・メンテナンス履歴・検討リストを管理します。">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
@@ -22,8 +21,7 @@ img{max-width:100%}
 [hidden]{display:none!important}
 </style>
 </head>
-<body>
-<title>時計メンテナンス台帳</title>
+<body><title>時計メンテナンス台帳</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -175,11 +173,15 @@ a{color:var(--cal)}
 .thumb{width:52px; height:52px; border-radius:4px; object-fit:cover; flex:none;
   border:1px solid var(--line-2); background:var(--surface-2)}
 .thumb.ph{display:grid; place-items:center; color:var(--ink-3); font-size:19px}
+.thumb.zoomable{cursor:zoom-in}
+.thumb.zoomable:hover{border-color:var(--ink-3)}
 .maker{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); font-family:var(--f-display)}
 .model{font-family:var(--f-display); font-size:20px; font-weight:400; line-height:1.25; margin-top:1px; letter-spacing:.01em}
 .meta{font-size:11.5px; color:var(--ink-3); margin-top:3px}
 .ages{font-size:11.5px; color:var(--ink-2); margin-top:3px}
 .ages b{font-family:var(--f-num); font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; font-size:12.5px}
+.costs{font-size:11.5px; color:var(--ink-3); margin-top:2px}
+.costs b{font-family:var(--f-mono); font-weight:500; color:var(--ink-2); font-variant-numeric:tabular-nums; font-size:12px}
 
 .nums{text-align:right; flex:none}
 .nums .big{font-family:var(--f-num); font-size:28px; font-weight:500; line-height:1; font-variant-numeric:tabular-nums}
@@ -618,7 +620,7 @@ function telHref(t){
 }
 
 /* ============ state ============ */
-var DEFAULT_CFG = { intervalYears:4, maxYears:8, carryDays:2, collectionSort:'due' };
+var DEFAULT_CFG = { intervalYears:4, maxYears:8, carryDays:2, collectionSort:'due', wishSort:'priority' };
 var state = { watches:{}, usage:{}, photos:{}, shops:{}, wishes:{}, config:Object.assign({},DEFAULT_CFG) };
 var view = { page:'collection', detail:null, tab:'overview', showAll:false, sortMode:false };
 var cal = null, dowSel = {};
@@ -981,24 +983,75 @@ function orderedWatchIds(){
   return ids;
 }
 /* writes every changed row, then renders once */
-function commitOrder(ids){
+function orderedWishIds(){
+  var ids = Object.keys(state.wishes);
+  var manual = state.config.wishSort === 'manual';
+  ids.sort(function(a,b){
+    var x = state.wishes[a], y = state.wishes[b];
+    var ox = x.order == null ? 1e9 : x.order, oy = y.order == null ? 1e9 : y.order;
+    if(!manual){
+      var px = x.priority || 2, py = y.priority || 2;
+      if(px !== py) return px - py;
+    }
+    if(ox !== oy) return ox - oy;
+    return (x.createdAt||'').localeCompare(y.createdAt||'');
+  });
+  return ids;
+}
+/* 並べ替え中のページが、どのコレクションを並べているか */
+function sortColl(){ return view.page === 'wish' ? 'wishes' : view.page === 'shops' ? 'shops' : 'watches'; }
+function currentOrderedIds(){
+  return view.page === 'wish' ? orderedWishIds() : view.page === 'shops' ? sortedShops() : orderedWatchIds();
+}
+/* 並び順を書き込み、最後に一度だけ描画する */
+function commitOrder(coll, ids){
   ids.forEach(function(id, i){
-    var w = state.watches[id];
-    if(!w || w.order === i) return;
-    var n = clone(w); n.order = i;
-    state.watches[id] = n;
+    var item = state[coll][id];
+    if(!item || item.order === i) return;
+    var n = clone(item); n.order = i;
+    state[coll][id] = n;
     if(mode === 'db'){
       (function(docId, body){
-        enqueue('watches/' + docId, function(){ return DB.doc('watches/' + docId).set(body); });
+        enqueue(coll + '/' + docId, function(){ return DB.doc(coll + '/' + docId).set(body); });
       })(id, n);
     }
   });
-  if(state.config.collectionSort !== 'manual'){
-    state.config = Object.assign({}, state.config, {collectionSort:'manual'});
+  var key = coll === 'wishes' ? 'wishSort' : coll === 'watches' ? 'collectionSort' : null;
+  if(key && state.config[key] !== 'manual'){
+    var patch = {}; patch[key] = 'manual';
+    state.config = Object.assign({}, state.config, patch);
     if(mode === 'db') enqueue('config/app', function(){ return DB.doc('config/app').set(state.config); });
   }
   if(mode !== 'db') saveLocal();
   render();
+}
+
+var HANDLE_SVG = '<svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true">'
+  + '<rect x="1" y="2" width="12" height="1.6" fill="currentColor"/>'
+  + '<rect x="1" y="7.2" width="12" height="1.6" fill="currentColor"/>'
+  + '<rect x="1" y="12.4" width="12" height="1.6" fill="currentColor"/></svg>';
+
+function sortListHTML(ids, glyph, labelFn){
+  var h = '<div class="note" style="margin-top:0;margin-bottom:12px">'
+    + '左のつまみを押したまま動かすと並べ替えられます。▲▼ でも移動できます。</div>'
+    + '<div class="sortlist" id="sortlist">';
+  ids.forEach(function(id, i){
+    var lab = labelFn(id);
+    h += '<div class="sortrow" data-sid="' + esc(id) + '">'
+      + '<span class="handle" data-handle="' + esc(id) + '" aria-label="ドラッグして並べ替え">' + HANDLE_SVG + '</span>'
+      + thumbHTML(id, 'thumb', glyph)
+      + '<span class="sid"><span class="sk">' + esc(lab.sub || '—') + '</span>'
+      + '<div class="sm">' + esc(lab.main) + '</div></span>'
+      + '<span class="updown"><button data-mv-up="' + esc(id) + '"' + (i===0?' disabled':'') + '>▲</button>'
+      + '<button data-mv-down="' + esc(id) + '"' + (i===ids.length-1?' disabled':'') + '>▼</button></span>'
+      + '</div>';
+  });
+  return h + '</div>';
+}
+function sortHeadHTML(toggleLabel){
+  if(view.sortMode) return '<button class="btn btn-sm btn-primary" data-act="sortdone">並べ替えを終える</button>';
+  return (toggleLabel ? '<button class="btn btn-sm btn-ghost" data-act="togglesort">' + esc(toggleLabel) + '</button>' : '')
+    + '<button class="btn btn-sm" data-act="sortmode">並べ替え</button>';
 }
 
 /* ============ usage helpers ============ */
@@ -1065,10 +1118,25 @@ function footHTML(){
       : (filePerm==='granted' ? ' 変更のたびに ' + esc(fileName) + ' へ自動保存されます。'
         : ' データはこの端末に保存されています。'));
 }
-function thumbHTML(id, cls){
+function thumbHTML(id, cls, glyph, zoom){
   var p = state.photos[id];
-  if(p && p.dataUrl) return '<img class="' + cls + '" src="' + p.dataUrl + '" alt="">';
-  return '<span class="' + cls + ' ph" aria-hidden="true">⌚</span>';
+  if(p && p.dataUrl){
+    return '<img class="' + cls + (zoom ? ' zoomable' : '') + '" src="' + p.dataUrl + '" alt=""'
+      + (zoom ? ' data-act="viewpic" data-id="' + esc(id) + '"' : '') + '>';
+  }
+  return '<span class="' + cls + ' ph" aria-hidden="true">' + (glyph || '⌚') + '</span>';
+}
+
+/* 「どちらでも」は旧表記。表示・入力とも新しい言い回しに寄せる */
+var COND_ANY = '新品・中古ともに可';
+function condLabel(v){ return (!v || v === 'どちらでも') ? COND_ANY : v; }
+
+/* 購入＋メンテの合計と、購入からの1日あたり */
+function costOf(w){
+  var total = Number(w.price) || 0;
+  (w.maintenances||[]).forEach(function(m){ total += Number(m.cost)||0; });
+  var days = w.purchaseDate ? Math.max(1, diffDays(parseYMD(w.purchaseDate), today())) : 0;
+  return { total: total, days: days, perDay: (total && days) ? Math.round(total / days) : null };
 }
 
 /* ---------- collection ---------- */
@@ -1110,36 +1178,14 @@ function collectionHTML(cfg){
 
   var ordered = orderedWatchIds();
 
-  h += '<div class="sec-head"><h2>コレクション</h2><span class="line"></span>';
-  if(view.sortMode){
-    h += '<button class="btn btn-sm btn-primary" data-act="sortdone">並べ替えを終える</button>';
-  }else{
-    h += '<button class="btn btn-sm btn-ghost" data-act="togglesort">'
-      + (cfg.collectionSort === 'manual' ? '並び：手動' : '並び：期限順') + '</button>'
-      + '<button class="btn btn-sm" data-act="sortmode">並べ替え</button>';
-  }
-  h += '</div>';
+  h += '<div class="sec-head"><h2>コレクション</h2><span class="line"></span>'
+    + sortHeadHTML(cfg.collectionSort === 'manual' ? '並び：手動' : '並び：期限順') + '</div>';
 
   if(view.sortMode){
-    h += '<div class="note" style="margin-top:0;margin-bottom:12px">'
-      + '左のつまみを押したまま動かすと並べ替えられます。▲▼ でも移動できます。</div>'
-      + '<div class="sortlist" id="sortlist">';
-    ordered.forEach(function(id, i){
+    return h + sortListHTML(ordered, '⌚', function(id){
       var w = state.watches[id];
-      h += '<div class="sortrow" data-sid="' + esc(id) + '">'
-        + '<span class="handle" data-handle="' + esc(id) + '" aria-label="ドラッグして並べ替え">'
-        + '<svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true">'
-        + '<rect x="1" y="2" width="12" height="1.6" fill="currentColor"/>'
-        + '<rect x="1" y="7.2" width="12" height="1.6" fill="currentColor"/>'
-        + '<rect x="1" y="12.4" width="12" height="1.6" fill="currentColor"/></svg></span>'
-        + thumbHTML(id, 'thumb')
-        + '<span class="sid"><span class="sk">' + esc(w.maker||'—') + '</span>'
-        + '<div class="sm">' + esc(w.model) + '</div></span>'
-        + '<span class="updown"><button data-mv-up="' + esc(id) + '"' + (i===0?' disabled':'') + '>▲</button>'
-        + '<button data-mv-down="' + esc(id) + '"' + (i===ordered.length-1?' disabled':'') + '>▼</button></span>'
-        + '</div>';
+      return {sub: w.maker, main: w.model};
     });
-    return h + '</div>';
   }
 
   h += '<div class="grid">';
@@ -1162,6 +1208,7 @@ function watchCard(id, cfg){
     + '<div class="model">' + esc(w.model) + '</div>'
     + '<div class="meta">' + esc(specLine(w)) + '</div>'
     + '<div class="ages">' + agesLine(w, sc) + '</div>'
+    + costLine(w)
     + '</div></div>';
 
   if(w.service){
@@ -1232,6 +1279,13 @@ function agesLine(w, sc){
     if(yrs >= 0) out.push(esc(w.modelYear) + '年式から <b>' + yrs + '</b>年');
   }
   return out.length ? out.join(' ／ ') : '<span style="color:var(--ink-3)">購入時期が未登録</span>';
+}
+function costLine(w){
+  var c = costOf(w);
+  if(!c.total) return '';
+  return '<div class="costs">費用 <b>' + esc(yen(c.total)) + '</b>'
+    + (c.perDay != null ? '　1日あたり <b>' + esc(yen(c.perDay)) + '</b>' : '')
+    + '</div>';
 }
 function serviceBlock(sv){
   var d = sv.nextActionDate ? diffDays(today(), parseYMD(sv.nextActionDate)) : null;
@@ -1370,6 +1424,8 @@ function overviewHTML(id, w, u, sc){
     + cell('状態', w.condition)
     + cell('購入金額', yen(w.price), true)
     + cell('メンテナンス総額', yen(spent), true)
+    + cell('費用合計（購入＋メンテ）', yen(costOf(w).total), true)
+    + cell('1日あたりの費用', costOf(w).perDay != null ? yen(costOf(w).perDay) + ' ／日' : '', true)
     + cell(isQuartz(w) ? 'メンテナンス回数' : 'オーバーホール回数',
         (isQuartz(w) ? (w.maintenances||[]).length : ohCount) + ' 回', true)
     + cell('着用した日の合計', totalDays + ' 日', true)
@@ -1566,8 +1622,16 @@ function shopPageHTML(){
       + '<div class="acts"><button class="btn btn-primary" data-act="addshop">店を追加</button></div></div>';
   }
   var h = '<div class="sec-head"><h2>利用店</h2><span class="line"></span>'
-    + '<span class="eyebrow">' + ids.length + ' 件</span></div>'
-    + '<div style="display:flex;flex-direction:column;gap:11px">';
+    + '<span class="eyebrow">' + ids.length + ' 件</span>'
+    + sortHeadHTML('') + '</div>';
+
+  if(view.sortMode){
+    return h + sortListHTML(ids, '🪪', function(id){
+      var s = state.shops[id];
+      return {sub: s.person ? '担当 ' + s.person : '', main: s.name};
+    });
+  }
+  h += '<div style="display:flex;flex-direction:column;gap:11px">';
   ids.forEach(function(id){
     var s = state.shops[id];
     var u = safeUrl(s.url), th = telHref(s.tel);
@@ -1607,7 +1671,7 @@ function shopPageHTML(){
       + '<div class="sside">'
       + (state.photos[id] && state.photos[id].dataUrl
         ? '<img class="meishi" src="' + state.photos[id].dataUrl + '" alt="'
-          + esc(s.name) + ' の名刺" data-act="viewcard" data-id="' + esc(id) + '">'
+          + esc(s.name) + ' の名刺" data-act="viewpic" data-id="' + esc(id) + '">'
         : '<button class="meishi-add" data-act="editshop" data-id="' + esc(id) + '">名刺を<br>登録</button>')
       + '<div class="acts">'
       + (u ? '<a class="btn btn-sm" href="' + esc(u) + '" target="_blank" rel="noopener">サイトを開く</a>' : '')
@@ -1619,12 +1683,7 @@ function shopPageHTML(){
 
 /* ---------- wish page ---------- */
 function wishPageHTML(){
-  var ids = Object.keys(state.wishes).sort(function(a,b){
-    var x = state.wishes[a], y = state.wishes[b];
-    return (x.priority||2) - (y.priority||2)
-      || (x.order==null?1e9:x.order) - (y.order==null?1e9:y.order)
-      || (x.createdAt||'').localeCompare(y.createdAt||'');
-  });
+  var ids = orderedWishIds();
   if(!ids.length){
     return '<div style="height:26px"></div><div class="empty">'
       + '<h2>検討中のモデルはまだありません</h2>'
@@ -1641,7 +1700,15 @@ function wishPageHTML(){
     + '<div><div class="k">巡回先の登録</div><div class="v">' + Object.keys(state.shops).length + '<small>店</small></div></div>'
     + '</div>';
   h += '<div class="sec-head"><h2>検討リスト</h2><span class="line"></span>'
-    + '<span class="eyebrow">優先度順</span></div><div class="grid">';
+    + sortHeadHTML(state.config.wishSort === 'manual' ? '並び：手動' : '並び：優先度順') + '</div>';
+
+  if(view.sortMode){
+    return h + sortListHTML(ids, '⌚', function(id){
+      var k = state.wishes[id];
+      return {sub: k.maker, main: k.model};
+    });
+  }
+  h += '<div class="grid">';
 
   ids.forEach(function(id){
     var k = state.wishes[id];
@@ -1649,11 +1716,11 @@ function wishPageHTML(){
     var shops = (k.shopIds||[]).filter(function(s){ return state.shops[s]; });
     var last = k.lastChecked ? diffDays(parseYMD(k.lastChecked), today()) : null;
     h += '<div class="card">'
-      + '<div class="ctop"><div class="cid">' + thumbHTML(id, 'thumb')
+      + '<div class="ctop"><div class="cid">' + thumbHTML(id, 'thumb', '⌚', true)
       + '<div style="min-width:0">'
       + '<div class="maker">' + esc(k.maker || 'メーカー未設定') + '</div>'
       + '<div class="model">' + esc(k.model) + '</div>'
-      + '<div class="meta">' + esc(k.ref ? 'Ref. ' + k.ref + ' ・ ' : '') + esc(k.condPref || 'どちらでも') + '</div>'
+      + '<div class="meta">' + esc(k.ref ? 'Ref. ' + k.ref + ' ・ ' : '') + esc(condLabel(k.condPref)) + '</div>'
       + '</div></div>'
       + '<span class="prio p' + pr + '">' + (pr===1?'高':pr===2?'中':'低') + '</span>'
       + '</div>'
@@ -1888,7 +1955,7 @@ function shopForm(id){
 }
 
 function wishForm(id){
-  var k = id ? state.wishes[id] : {condPref:'どちらでも', priority:2};
+  var k = id ? state.wishes[id] : {condPref:COND_ANY, priority:2};
   var cur = (id && state.photos[id]) ? state.photos[id].dataUrl : null;
   formPhoto = cur || null; photoTarget = 'wish';
   var picked = k.shopIds || [];
@@ -1901,7 +1968,7 @@ function wishForm(id){
     + '<label class="full"><span class="lb">モデル名</span><input id="k_model" value="' + esc(k.model||'') + '" placeholder="例：Explorer 1 124270"></label>'
     + comboField('k_maker', k.maker, '例：ROLEX', 'maker', 'メーカー')
     + '<label><span class="lb">リファレンス番号</span><input id="k_ref" value="' + esc(k.ref||'') + '" placeholder="124270"></label>'
-    + segField('k_cond', '希望する状態', ['新品','中古','どちらでも'], k.condPref || 'どちらでも')
+    + segField('k_cond', '希望する状態', ['新品','中古',COND_ANY], condLabel(k.condPref))
     + '<label><span class="lb">希望価格（円）</span><input id="k_target" type="number" min="0" step="10000" value="' + esc(k.targetPrice==null?'':k.targetPrice) + '" placeholder="900000"></label>'
     + '<label><span class="lb">定価（円）</span><input id="k_list" type="number" min="0" step="10000" value="' + esc(k.listPrice==null?'':k.listPrice) + '" placeholder="1100000"></label>'
     + '<label><span class="lb">予算上限（円）</span><input id="k_budget" type="number" min="0" step="10000" value="' + esc(k.budget==null?'':k.budget) + '" placeholder="1050000"></label>'
@@ -2046,7 +2113,7 @@ document.addEventListener('pointerup', function(){
   drag.row.classList.remove('dragging');
   var ids = [].slice.call(drag.list.querySelectorAll('.sortrow')).map(function(r){ return r.getAttribute('data-sid'); });
   drag = null;
-  commitOrder(ids);
+  commitOrder(sortColl(), ids);
   render();
 });
 document.addEventListener('pointercancel', function(){
@@ -2141,11 +2208,11 @@ document.addEventListener('click', function(e){
   if(t.hasAttribute('data-mv-up') || t.hasAttribute('data-mv-down')){
     var mid0 = t.getAttribute('data-mv-up') || t.getAttribute('data-mv-down');
     var dir = t.hasAttribute('data-mv-up') ? -1 : 1;
-    var ord = orderedWatchIds();
+    var ord = currentOrderedIds();
     var ix = ord.indexOf(mid0), jx = ix + dir;
     if(ix < 0 || jx < 0 || jx >= ord.length) return;
     ord.splice(jx, 0, ord.splice(ix, 1)[0]);
-    commitOrder(ord); render(); return;
+    commitOrder(sortColl(), ord); return;
   }
   if(t.hasAttribute('data-delmaint')){
     var mid = t.getAttribute('data-delmaint');
@@ -2185,10 +2252,15 @@ document.addEventListener('click', function(e){
     case 'sortmode': view.sortMode = true; render(); break;
     case 'sortdone': view.sortMode = false; render(); toast('並び順を保存しました'); break;
     case 'togglesort': {
-      var c0 = Object.assign({}, state.config,
-        {collectionSort: state.config.collectionSort === 'manual' ? 'due' : 'manual'});
-      putConfig(c0);
-      toast(c0.collectionSort === 'manual' ? '自分で決めた並びで表示します' : '実質の期限が近い順で表示します');
+      if(view.page === 'wish'){
+        var toManualW = state.config.wishSort !== 'manual';
+        putConfig(Object.assign({}, state.config, {wishSort: toManualW ? 'manual' : 'priority'}));
+        toast(toManualW ? '自分で決めた並びで表示します' : '優先度の高い順で表示します');
+      }else{
+        var toManual = state.config.collectionSort !== 'manual';
+        putConfig(Object.assign({}, state.config, {collectionSort: toManual ? 'manual' : 'due'}));
+        toast(toManual ? '自分で決めた並びで表示します' : '実質の期限が近い順で表示します');
+      }
       break;
     }
 
@@ -2201,15 +2273,27 @@ document.addEventListener('click', function(e){
       break;
     }
 
-    case 'viewcard': {
-      var cid2 = t.getAttribute('data-id');
-      var shop = state.shops[cid2], pic = state.photos[cid2];
-      if(!shop || !pic || !pic.dataUrl) break;
-      openModal('<h3>' + esc(shop.name) + '</h3>'
-        + '<div class="sub">' + esc(shop.person ? '担当 ' + shop.person : '名刺') + '</div>'
-        + '<img class="lightbox" src="' + pic.dataUrl + '" alt="' + esc(shop.name) + ' の名刺">'
-        + '<div class="modal-acts">'
-        + '<button class="btn" data-act="editshop" data-id="' + esc(cid2) + '">店の情報を編集</button>'
+    /* 写真の拡大表示。店の名刺・検討リスト・時計のどれでも開ける */
+    case 'viewpic': {
+      var pid2 = t.getAttribute('data-id');
+      var pic = state.photos[pid2];
+      if(!pic || !pic.dataUrl) break;
+      var shop = state.shops[pid2], wish = state.wishes[pid2], wat = state.watches[pid2];
+      var title, sub, editAct;
+      if(shop){
+        title = shop.name; sub = shop.person ? '担当 ' + shop.person + ' の名刺' : '名刺';
+        editAct = '<button class="btn" data-act="editshop" data-id="' + esc(pid2) + '">店の情報を編集</button>';
+      }else if(wish){
+        title = wish.model; sub = [wish.maker, wish.ref ? 'Ref. ' + wish.ref : ''].filter(Boolean).join(' ／ ');
+        editAct = '<button class="btn" data-act="editwish" data-id="' + esc(pid2) + '">この検討を編集</button>';
+      }else if(wat){
+        title = wat.model; sub = wat.maker || '';
+        editAct = '<button class="btn" data-act="edit" data-id="' + esc(pid2) + '">情報を編集</button>';
+      }else break;
+      openModal('<h3>' + esc(title) + '</h3>'
+        + '<div class="sub">' + esc(sub) + '</div>'
+        + '<img class="lightbox" src="' + pic.dataUrl + '" alt="' + esc(title) + ' の写真">'
+        + '<div class="modal-acts">' + editAct
         + '<button class="btn btn-primary" data-act="cancel">閉じる</button></div>');
       break;
     }
@@ -2384,7 +2468,7 @@ document.addEventListener('click', function(e){
         model: km,
         maker: $('#k_maker').value.trim(),
         ref: $('#k_ref').value.trim(),
-        condPref: condB ? condB.getAttribute('data-seg') : 'どちらでも',
+        condPref: condB ? condB.getAttribute('data-seg') : COND_ANY,
         targetPrice: $('#k_target').value !== '' ? +$('#k_target').value : null,
         listPrice: $('#k_list').value !== '' ? +$('#k_list').value : null,
         budget: $('#k_budget').value !== '' ? +$('#k_budget').value : null,
@@ -2534,7 +2618,7 @@ function loadSample(){
   putUsage(b, pattern(3));
 
   put('wishes', uid('k'), { model:'サンプル：Explorer 1 124270', maker:'ROLEX', ref:'124270',
-    condPref:'どちらでも', targetPrice:1050000, listPrice:960000, budget:1200000, priority:1,
+    condPref:COND_ANY, targetPrice:1050000, listPrice:960000, budget:1200000, priority:1,
     shopIds:[s1,s2], memo:'相場が落ち着いたら', lastChecked:'', order:0, createdAt:new Date().toISOString() });
 
   toast('サンプルを読み込みました。不要になったら各項目の編集画面から削除できます。');
